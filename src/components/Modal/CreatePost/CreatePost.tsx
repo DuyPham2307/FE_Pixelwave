@@ -8,6 +8,7 @@ import Step3 from "./Step/Step3";
 import { uploadPost } from "@/services/postService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CreatePostProps {
 	onClose: () => void;
@@ -22,6 +23,7 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 	const [taggedUserIds, setTaggedUserIds] = useState<number[] | null>(null);
 
 	const navigate = useNavigate();
+	const {user} = useAuth();
 
 	const nextStep = () => setStep((prev) => prev + 1);
 	const prevStep = () => setStep((prev) => prev - 1);
@@ -46,7 +48,7 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 			}
 		} finally{
 			setLoading(false);
-			navigate('/user/profile');
+			navigate(`/user/${user?.id}`);
 		}
 	};
 

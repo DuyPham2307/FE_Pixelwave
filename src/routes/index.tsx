@@ -16,6 +16,7 @@ import Messenger from "@/pages/user/Messenger";
 import Settings from "@/pages/user/Settings";
 import Profile from "@/pages/user/Profile";
 import GoogleCallback from "@/components/SwitchPage/GoogleCallback";
+import EditNewProfile from "@/pages/EditNewProfile";
 
 const AppRoutes = () => {
 	return (
@@ -35,6 +36,15 @@ const AppRoutes = () => {
 					element={
 						<AuthLayout>
 							<Login />
+						</AuthLayout>
+					}
+				/>
+
+				<Route
+					path="/edit-first-time"
+					element={
+						<AuthLayout>
+							<EditNewProfile />
 						</AuthLayout>
 					}
 				/>

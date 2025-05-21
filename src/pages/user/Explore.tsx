@@ -1,14 +1,24 @@
-import '@/styles/pages/_explore.scss'
+import "@/styles/pages/_explore.scss";
 import PostDetails from "@/components/Post/PostDetails";
 import { PostDetail, PostRequestPage, PostSimple } from "@/models/PostModel";
-import { getPostFromId, getPostFromUserId } from "@/services/postService";
-import { Command, Heart } from "lucide-react";
+import {
+	getPostFromId,
+	getPostFromUserId,
+	toggleLikePost,
+} from "@/services/postService";
+import { Heart, MessageCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const Explore: React.FC = () => {
 	const [fetchPosts, setFetchPosts] = useState<PostSimple[]>([]);
 	const [detailPost, setDetailPost] = useState<PostDetail | null>(null);
+	const [isLiked, setIsLiked] = useState<boolean | undefined>(
+		detailPost?.isLiked
+	);
+	const [likeCount, setLikeCount] = useState<number | undefined>(
+		detailPost?.likeCount
+	);
 
 	useEffect(() => {
 		const fetchUserPost = async () => {
@@ -38,13 +48,33 @@ const Explore: React.FC = () => {
 		}
 	};
 
+	const handleReact = async (): Promise<void> => {
+		try {
+			await toggleLikePost(detailPost.id);
+			if (detailPost.isLiked) {
+				setIsLiked(false);
+				setLikeCount((prev) => Math.max(0, prev - 1));
+
+				toast.success("Unlike post successfully!");
+			} else {
+				setIsLiked(true);
+				setLikeCount((prev) => prev + 1);
+
+				toast.success("Like post successfully!");
+			}
+		} catch (error) {
+			console.error("Error handling reaction:", error);
+			toast.error("Có lỗi khi like/unlike");
+		}
+	};
+
 	return (
 		<div className="explore-container">
 			{detailPost ? (
 				<PostDetails
 					post={detailPost}
 					onClose={() => setDetailPost(null)}
-					setLike={() => setDetailPost(null)}
+					onLikeChanged={handleReact}
 				/>
 			) : (
 				""
@@ -63,7 +93,7 @@ const Explore: React.FC = () => {
 									{post.likeCount} <Heart />
 								</span>
 								<span>
-									{post.commentCount} <Command />
+									{post.commentCount} <MessageCircle />
 								</span>
 							</div>
 						</div>

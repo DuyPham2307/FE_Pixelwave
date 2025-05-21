@@ -96,28 +96,39 @@ const Login = () => {
 		setRegisterForm((prev) => ({ ...prev, showPassword: !prev.showPassword }));
 	};
 
-	const handleRegister = async (e: React.FormEvent) => {
-		e.preventDefault();
-		const { username, password, fullName, age } = registerForm;
-		if (!username || !password || !fullName || !age) {
-			toast.error("Please fill in all fields");
-			return;
-		}
-		setLoading(true);
-		try {
-			await register({ username, password, fullName, age });
-			toast.success("Register successful! Now you can log in.");
-			setShowModal(false);
-		} catch (err: unknown) {
-			if (err instanceof Error) {
-				console.log("Error while using axios: ", err);
-			} else {
-				toast.error("An unexpected error occurred. Please try again.");
-			}
-		} finally {
-			setLoading(false);
-		}
-	};
+const handleRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const { username, password, fullName, age } = registerForm;
+
+  if (!username || !password || !fullName || !age) {
+    toast.error("Please fill in all fields");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // Đăng ký
+    await register({ username, password, fullName, age });
+    toast.success("Register successful!");
+
+    // ✅ Đăng nhập tự động ngay sau đăng ký
+    const response = await login({ username, password });
+		console.log(response);		
+
+    // ✅ Điều hướng tới trang chỉnh sửa hồ sơ
+    navigate("/edit-first-time");
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("Register or login error:", err);
+      toast.error(err.message);
+    } else {
+      toast.error("An unexpected error occurred. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 	return (
 		<div className="login">

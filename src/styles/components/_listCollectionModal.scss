@@ -1,0 +1,65 @@
+.list-collection-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .modal-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    max-height: 80vh;
+    overflow-y: auto;
+    width: 500px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    h1{
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    button.close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .collection-item {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #f9f9f9;
+      }
+
+      h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.2rem;
+        color: #333;
+      }
+
+      p {
+        margin: 0.25rem 0;
+        font-size: 0.95rem;
+        color: #666;
+      }
+    }
+  }
+}
