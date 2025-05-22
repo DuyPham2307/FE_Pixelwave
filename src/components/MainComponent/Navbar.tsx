@@ -4,16 +4,18 @@ import "@/styles/components/_navbar.scss"; // Import the CSS file for styling
 import CreatePost from "@/components/Modal/CreatePost/CreatePost";
 
 import logo from "@/assets/images/logo.png";
-import { Bell, Search, SquarePlus } from "lucide-react";
+import { Bell, Contact, Search, SquarePlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
+import FriendRequestDropdown from "../Dropdown/FriendRequestDropdown";
 
 const Navbar = () => {
 	const navigate = useNavigate();
 	const { user, logout } = useAuth();
 	const [loading, setLoading] = useState<boolean>(false);
 	const [showModal, setShowModal] = useState<boolean>(false);
+	const [showPendingFriend, setShowPendingFriend] = useState(false);
 	// const [showNotifications, setShowNotifications] = useState<boolean>(false);
 
 	const handleLogout = () => {
@@ -21,7 +23,7 @@ const Navbar = () => {
 		logout();
 		toast.success("Logout successful!");
 		setLoading(false);
-		navigate('/login');
+		navigate("/login");
 	};
 	const path = window.location.pathname.split("/")[1];
 
@@ -44,24 +46,32 @@ const Navbar = () => {
 					<input type="text" placeholder="Search..." className="search-input" />
 				</div>
 				<div className="user-interaction">
+					<div
+						className="request-friend-pending"
+						onClick={() => setShowPendingFriend((prev) => !prev)}
+					>
+						<button className="pending-btn">
+							<Contact />
+						</button>
+						{showPendingFriend && <FriendRequestDropdown />}
+					</div>
 					<div className="create-post" onClick={() => setShowModal(true)}>
 						<button className="create-btn">
 							<SquarePlus />
 						</button>
 					</div>
-					<div
-						className="notifications"
-						// onClick={() => setShowNotifications(!setShowNotifications)}
-					>
+					<div className="notifications">
 						<button className="notification-btn">
 							<Bell />
 						</button>
-						{/* {showNotifications && <ThongBaoDropdown />} */}
 					</div>
 					<div className="profile">
 						<img src={user?.avatar} alt="logo for user" />
 						<ul className="menu">
-							<li className="item" onClick={() => navigate(`/user/${user?.id}`)}>
+							<li
+								className="item"
+								onClick={() => navigate(`/user/${user?.id}`)}
+							>
 								Your profile
 							</li>
 							<li className="item" onClick={() => navigate("/user/settings")}>

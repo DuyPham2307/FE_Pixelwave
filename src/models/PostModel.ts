@@ -8,19 +8,6 @@ export interface UploadPost {
 	taggedUserIds: number[] | null;
 }
 
-// export interface PostResponse {
-//   id: number;
-//   caption: string;
-//   privacySetting: string;
-//   createdAt: string; // Hoặc Date nếu bạn sẽ parse lại sau
-//   user: UserResponse;
-//   images: ImageDTO[]; // Thay vì Hash<>
-//   taggedUsers: UserResponse[]; // Thay vì Set<>
-//   likeCount: number;
-//   commentCount: number;
-//   isLikedByUser: boolean;
-// }
-
 export interface PostRequestPage {
   userId: number;
   page?: number;
@@ -59,7 +46,7 @@ export interface PostDetail {
   likeCount: number;
   commentCount: number;
   isTaggedUser: boolean;
-  isLiked: boolean;
+  liked: boolean;
   tagUserCount: number;
   images: ImageDTO[];
 }

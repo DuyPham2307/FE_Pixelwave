@@ -109,21 +109,33 @@ export const getFeed = async (limit: number = 10): Promise<PostDetail[]> => {
 };
 
 
-export const toggleLikePost = async (postId: number) => {
+export const likePost = async (postId: number) => {
 	try {
-		const response = await api.post(`api/post/${postId}/toggle-like`);
-    console.log("Toggle like response:", response);
-    
-		return response.data;
+		await api.post(`api/post/${postId}/like`);
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			console.error("Toggle like failed:", error.response?.data);
 			throw new Error(error.response?.data?.message || "Toggle like failed");
 		} else {
 			console.error("Toggle like failed:", error);
-			throw new Error("Unexpected error");
+			throw new Error(error);
 		}
 	}
 };
+
+export const unlikePost = async (postId: number) => {
+	try {
+		await api.post(`api/post/${postId}/unlike`);
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("Toggle like failed:", error.response?.data);
+			throw new Error(error.response?.data?.message || "Toggle like failed");
+		} else {
+			console.error("Toggle like failed:", error);
+			throw new Error(error);
+		}
+	}
+};
+
 
 

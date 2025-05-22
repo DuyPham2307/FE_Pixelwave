@@ -1,3 +1,5 @@
+import { UserResponse } from "./AuthModel";
+
 export interface UserDetailResponse {
   id: number;
   fullName: string;
@@ -30,4 +32,17 @@ export interface UserDTO {
   id: number;
   username: string;
   avatar: string;
+}
+
+export interface UserRecommendationDTO {
+    id: number;
+    fullName: string;
+    avatar: string;
+    mutualFriendsCount: number;
+}
+
+export interface AddFriendRequestDTO{
+  id: number;
+  sender: UserResponse;
+  createAt: string;
 }

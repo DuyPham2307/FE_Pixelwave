@@ -4,9 +4,20 @@ import { UserDetailResponse } from "@/models/UserModel";
 import { PostDetail, PostRequestPage, PostSimple } from "@/models/PostModel";
 import { getPostFromId, getPostFromUserId } from "@/services/postService";
 import "@/styles/components/_profileCard.scss";
-import { Ban, Cake, Command, Heart, LayoutGrid, Phone, SquarePen, Tags, VenusAndMars } from "lucide-react";
+import {
+	Ban,
+	Cake,
+	Command,
+	Heart,
+	LayoutGrid,
+	Phone,
+	SquarePen,
+	Tags,
+	VenusAndMars,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import PostDetails from "./../Post/PostDetails";
+import { addFriend } from "@/services/friendService";
 
 const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const { user } = useAuth();
@@ -45,14 +56,20 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 		}
 	};
 
+	const requestAddFriend = async (userId: number) => {
+		try {
+			await addFriend(userId);
+			toast.success("Send add friend request success!");
+		} catch (error) {
+			console.log(error);
+			toast.error("Send add friend request fail!");
+		}
+	};
+
 	return (
 		<div className="profile-container">
 			{detailPost ? (
-				<PostDetails
-					post={detailPost}
-					onClose={() => setDetailPost(null)}
-					setLike={() => setDetailPost(null)}
-				/>
+				<PostDetails post={detailPost} onClose={() => setDetailPost(null)} />
 			) : (
 				""
 			)}
@@ -64,7 +81,12 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 						{isMyWall ? undefined : (
 							<div className="interaction">
 								<button className="follow">Following</button>
-								<button className="addFriend">+ Add friend</button>
+								<button
+									className="addFriend"
+									onClick={() => requestAddFriend(props.id)}
+								>
+									+ Add friend
+								</button>
 								<button className="block">
 									<Ban /> Block
 								</button>
@@ -82,9 +104,15 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 					</div>
 					<p>{props.bio}</p>
 					<div className="introduce">
-						<p><VenusAndMars /> {props.gender}</p>
-						<p><Cake /> {props.age}</p>
-						<p><Phone /> {props.phoneNumber}</p>
+						<p>
+							<VenusAndMars /> {props.gender}
+						</p>
+						<p>
+							<Cake /> {props.age}
+						</p>
+						<p>
+							<Phone /> {props.phoneNumber}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -105,7 +133,11 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 				<div className="wall-posts">
 					{fetchPosts.map((post) => {
 						return (
-							<div className="item" key={post.id} onClick={() => handleShowPost(post.id)}>
+							<div
+								className="item"
+								key={post.id}
+								onClick={() => handleShowPost(post.id)}
+							>
 								<img src={post.imageUrl} alt="Post image" />
 								<div className="counter">
 									<span>

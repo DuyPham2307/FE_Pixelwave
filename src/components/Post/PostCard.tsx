@@ -14,7 +14,7 @@ import CarouselImage from "./CarouselImage";
 import { formatTimestamp } from "@/utils/formatTimestamp";
 import PostDetails from "./PostDetails";
 import { Link } from "react-router-dom";
-import { toggleLikePost } from "@/services/postService";
+import { likePost, unlikePost } from "@/services/postService";
 import toast from "react-hot-toast";
 import ListCollection from "../Modal/ListCollection/ListCollectionModal";
 
@@ -27,7 +27,7 @@ const PostCard: React.FC<PostProps> = (props) => {
 	const post = props.post;
 	const [showDetail, setShowDetail] = useState(false);
 	const [showModalCollection, setShowModalCollection] = useState(false);
-	const [isLiked, setIsLiked] = useState<boolean>(post.isLiked);
+	const [isLiked, setIsLiked] = useState<boolean>(post.liked);
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 
 	const getPrivacyIcon = (setting: string) => {
@@ -45,13 +45,13 @@ const PostCard: React.FC<PostProps> = (props) => {
 
 	const handleReact = async (): Promise<void> => {
 		try {
-			await toggleLikePost(post.id);
-			if (post.isLiked) {
+			if (isLiked) {
+				await unlikePost(post.id);
 				setIsLiked(false);
 				setLikeCount((prev) => Math.max(0, prev - 1));
-
 				toast.success("Unlike post successfully!");
 			} else {
+				await likePost(post.id);
 				setIsLiked(true);
 				setLikeCount((prev) => prev + 1);
 
@@ -59,7 +59,7 @@ const PostCard: React.FC<PostProps> = (props) => {
 			}
 		} catch (error) {
 			console.error("Error handling reaction:", error);
-			toast.error("Có lỗi khi like/unlike");
+			toast.error("An error occurred");
 		}
 	};
 
@@ -75,7 +75,7 @@ const PostCard: React.FC<PostProps> = (props) => {
 				<PostDetails
 					post={post}
 					onClose={() => setShowDetail(false)}
-					onLikeChanged={handleReact}
+					// onLikeChanged={handleReact}
 				/>
 			) : (
 				<>

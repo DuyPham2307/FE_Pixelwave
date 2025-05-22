@@ -10,19 +10,21 @@ import CommentList from "./../Comment/CommentList";
 import CommentForm from "./../Comment/CommentForm";
 import { CommentResponseDTO } from "@/models/CommentModel";
 import ListCollection from "../Modal/ListCollection/ListCollectionModal";
+import { likePost, unlikePost } from "@/services/postService";
+import toast from "react-hot-toast";
 
 type PostDetailsProps = {
 	post: PostDetail;
 	onClose: () => void;
-	onLikeChanged: () => void;
+	// onLikeChanged: () => void;
 };
 
 const PostDetails: React.FC<PostDetailsProps> = ({
 	post,
 	onClose,
-	onLikeChanged,
+	// onLikeChanged,
 }) => {
-	const [isLiked, setIsLiked] = useState<boolean>(post.isLiked);
+	const [isLiked, setIsLiked] = useState<boolean>(post.liked);
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 	const [comments, setComments] = useState<CommentResponseDTO[]>([]);
 	const [showModalCollection, setShowModalCollection] = useState(false);
@@ -38,13 +40,33 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 
 	useEffect(() => {
 		fetchComments();
-	}, [post.id]);
+	}, []);
 
-	const handleLikeClick = () => {
-		const newLiked = !isLiked;
-		setIsLiked(newLiked);
-		onLikeChanged();
-		setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+	// const handleLikeClick = () => {
+	// 	const newLiked = !isLiked;
+	// 	setIsLiked(newLiked);
+	// 	onLikeChanged();
+	// 	setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+	// };
+
+	const handleReact = async (): Promise<void> => {
+		try {
+			if (isLiked) {
+				await unlikePost(post.id);
+				setIsLiked(false);
+				setLikeCount((prev) => Math.max(0, prev - 1));
+				toast.success("Unlike post successfully!");
+			} else {
+				await likePost(post.id);
+				setIsLiked(true);
+				setLikeCount((prev) => prev + 1);
+
+				toast.success("Like post successfully!");
+			}
+		} catch (error) {
+			console.error("Error handling reaction:", error);
+			toast.error("An error occurred");
+		}
 	};
 
 	const getPrivacyIcon = (setting: string) => {
@@ -104,7 +126,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 						</div>
 
 						<div className="post-actions">
-							<button className="like-btn" onClick={handleLikeClick}>
+							<button className="like-btn" onClick={handleReact}>
 								{isLiked ? <Heart fill="red" color="red" /> : <Heart />}
 								<span>{likeCount}</span>
 							</button>

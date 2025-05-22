@@ -18,7 +18,6 @@
 		border-radius: 12px;
 		width: 400px;
 		max-height: 80vh;
-		overflow-y: auto;
 		position: relative;
 		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 
@@ -26,6 +25,7 @@
 			text-align: center;
 			font-size: 20px;
 			margin-bottom: 16px;
+			font-weight: bold;
 		}
 
 		.close-btn {
@@ -46,15 +46,18 @@
 		.modal-collection-list {
 			border-top: 1px solid #ddd;			
       padding-top: 16px;
+			overflow-y: scroll;
+			scrollbar-width: none;
 
 			.collection-item {
 				padding: 12px 16px;
 				border-bottom: 1px solid #eee;
+				border-radius: 8px;
 				cursor: pointer;
 				transition: background-color 0.2s;
 
 				&:hover {
-					background-color: #f9f9f9;
+					background-color: #d6d6d6;
 				}
 
 				h3 {

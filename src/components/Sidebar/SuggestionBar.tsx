@@ -1,35 +1,45 @@
+import { UserRecommendationDTO } from "@/models/UserModel";
+import { addFriend, getRecommendUser } from "@/services/friendService";
 import "@/styles/components/_suggestionBar.scss"; // Import your CSS file here
 import { UserPlus } from "lucide-react";
-
-type Suggestion = {
-	name: string;
-	avatar: string;
-	direct: string;
-};
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import Spinner from "../Spinner/Spinner";
 
 const SuggestionBar = () => {
-	const fakeData: Suggestion[] = [
-		{
-			name: "Anonymous",
-			avatar: "http://example.com/400x400",
-			direct: "/user/id_fake",
-		},
-		{
-			name: "Anonymous",
-			avatar: "http://example.com/400x400",
-			direct: "/user/id_fake",
-		},
-		{
-			name: "Anonymous",
-			avatar: "http://example.com/400x400",
-			direct: "/user/id_fake",
-		},
-		{
-			name: "Anonymous",
-			avatar: "http://example.com/400x400",
-			direct: "/user/id_fake",
-		},
-	];
+	const [isLoading, setIsLoading] = useState(false);
+	const [userRecommend, setUserRecommend] = useState<UserRecommendationDTO[]>(
+		[]
+	);
+
+	useEffect(() => {
+		const fetchRecommend = async (): Promise<void> => {
+			setIsLoading(true);
+			try {
+				const data = await getRecommendUser(5);
+				setUserRecommend(data);
+				toast.success("get rcm");
+				console.log(data);
+			} catch (error) {
+				console.error("Error handling reaction:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchRecommend();
+	}, []);
+
+	const requestAddFriend = async (userId: number) => {
+		try {
+			await addFriend(userId);
+			toast.success("Send add friend request success!")
+			setUserRecommend((prev) => prev.filter((user) => user.id !== userId));
+		} catch (error) {
+			console.log(error);
+			toast.error("Send add friend request fail!")
+		}
+	}
 
 	return (
 		<div className="suggestion-bar">
@@ -37,24 +47,30 @@ const SuggestionBar = () => {
 				<span>Suggested For You</span>
 				<span className="sub-label">See all</span>
 			</div>
-			<div className="list">
-				{fakeData.map((item, index) => (
-					<div key={index} className="item">
-						<img
-							src={item.avatar}
-							alt={item.name}
-							className="avatar"
-						/>
-						<div className="info">
-							<h3 className="name">{item.name}</h3>
-							<p className="desc">Followed by 3 people you know</p>
+			{isLoading ? (
+				<Spinner />
+			) : (
+				<div className="list">
+					{userRecommend.map((user) => (
+						<div key={user.id} className="item">
+							<img src={user.avatar} alt={user.fullName} className="avatar" />
+							<div className="info">
+								<h3 className="name">
+									<a href={`/user/${user.id}`}>{user.fullName}</a>
+								</h3>
+								<p className="desc">
+									{user.mutualFriendsCount > 0
+										? `+${user.mutualFriendsCount} friend`
+										: "Don't have friend"}
+								</p>
+							</div>
+							<button onClick={() => requestAddFriend(user.id)} className="direct">
+								<UserPlus />
+							</button>
 						</div>
-						<a href={item.direct} className="direct">
-							<UserPlus />
-						</a>
-					</div>
-				))}
-			</div>
+					))}
+				</div>
+			)}
 		</div>
 	);
 };
