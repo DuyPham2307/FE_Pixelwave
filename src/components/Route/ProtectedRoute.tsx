@@ -8,9 +8,9 @@ type ProtectedRouteProps = {
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   const userSave = localStorage.getItem('user');
   const role = userSave ? JSON.parse(userSave).role : "";
+  if (!role) return <Navigate to="/login" replace />;
   return allowedRoles.includes(role) ? <Outlet /> : <Navigate to="/login" replace />;
 
-  if (!role) return <Navigate to="/login" replace />;
 
 };
 

@@ -1,45 +1,86 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import "@/styles/pages/_home.scss";
 import { PostDetail } from "@/models/PostModel";
 import { getFeed } from "@/services/postService";
 import PostCard from "@/components/Post/PostCard";
+import { useNavigate } from "react-router-dom";
+import Explore from './Explore';
 
 const Home: React.FC = () => {
-	const [posts, setPosts] = React.useState<Array<PostDetail> | undefined>();
-	// const [postShow, setPosShow] = React.useState<string | null>(null);
+	const [posts, setPosts] = useState<PostDetail[]>([]);
+	const [limit, setLimit] = useState<number>(10);
+	const [loading, setLoading] = useState(false);
+	const [hasMore, setHasMore] = useState(true);
+
+	const navigate = useNavigate();
+
+	const loadPosts = useCallback(async () => {
+		if (loading || !hasMore) return;
+
+		setLoading(true);
+
+		try {
+			const data: PostDetail[] = await getFeed(limit);
+			const newPosts = data;
+			// Nếu số bài trả về ít hơn limit => hết bài
+			if (newPosts.length < limit) {
+				setHasMore(false);
+			}
+
+			// So sánh để chỉ thêm bài mới (không trùng)
+			setPosts((prevPosts: PostDetail[]) => {
+				// Tạo map id bài cũ
+				const existingIds = new Set(prevPosts.map((p) => p.id));
+
+				// Lọc những bài mới chưa có trong prevPosts
+				const filteredNew = newPosts.filter((p) => !existingIds.has(p.id));
+
+				return [...prevPosts, ...filteredNew];
+			});
+
+			// Tăng limit cho lần gọi tiếp theo
+			setLimit((prev) => prev + 10);
+		} catch (error) {
+			console.error("Load posts error", error);
+		} finally {
+			setLoading(false);
+		}
+	}, [limit, loading, hasMore]);
 
 	useEffect(() => {
-		const fetchPost = async () => {
-			try {
-				const res = await getFeed();
-				setPosts(res); // Nếu là 1 post thì gói lại thành mảng
-				console.log("Loaded post:", res);
-			} catch (error) {
-				console.error("Error loading post:", error);
+		loadPosts();
+	}, []);
+
+	// Scroll event để gọi loadPosts khi gần cuối
+	useEffect(() => {
+		const onScroll = () => {
+			if (
+				window.innerHeight + window.scrollY >=
+					document.documentElement.scrollHeight - 200 &&
+				hasMore &&
+				!loading
+			) {
+				loadPosts();
 			}
 		};
 
-		fetchPost();
-	}, []);
-
-	// const viewPostDetails = (post: PostModel) => {
-	// 	setPosShow(post);
-	// };
-	// const closePostDetails = () => {
-	// 	setPosShow(null);
-	// };
+		window.addEventListener("scroll", onScroll);
+		return () => window.removeEventListener("scroll", onScroll);
+	}, [loadPosts, hasMore, loading]);
 
 	return (
 		<div className="home">
-			{posts ? posts.map(post => (
-				<PostCard
-					key={post.id}
-					post={post}
-				/>
-			)) : (
-				""
-			)}
+			{posts ? posts.map((post) => <PostCard key={post.id} post={post} />) : ""}
+			{loading && <p>Loading...</p>}
+      {!hasMore && (
+        <p
+          className="last-post"
+          onClick={() => navigate("/user/explore")}
+        >
+          No more posts. Explore now!
+        </p>
+      )}
 		</div>
 	);
 };

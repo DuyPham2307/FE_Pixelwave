@@ -10,7 +10,6 @@ import bg from "@/assets/images/bg.png";
 import logo from "@/assets/images/logo.png";
 import { Eye, EyeOff } from "lucide-react";
 
-
 const Login = () => {
 	const { register, login } = useAuth();
 	const navigate = useNavigate();
@@ -20,7 +19,7 @@ const Login = () => {
 		username: string;
 		password: string;
 		showPassword: boolean;
-	};
+	}
 
 	const [loginForm, setLoginForm] = useState<LoginFormState>({
 		username: "",
@@ -73,6 +72,7 @@ const Login = () => {
 	type RegisterFormState = {
 		username: string;
 		password: string;
+		confirmPassword: string;
 		fullName: string;
 		age: number;
 		showPassword: boolean;
@@ -82,6 +82,7 @@ const Login = () => {
 	const [registerForm, setRegisterForm] = useState<RegisterFormState>({
 		username: "",
 		password: "",
+		confirmPassword: "",
 		fullName: "",
 		age: NaN,
 		showPassword: false,
@@ -96,39 +97,70 @@ const Login = () => {
 		setRegisterForm((prev) => ({ ...prev, showPassword: !prev.showPassword }));
 	};
 
-const handleRegister = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const { username, password, fullName, age } = registerForm;
+	const isValidPassword = (password: string): boolean => {
+		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+		return passwordRegex.test(password);
+	};
 
-  if (!username || !password || !fullName || !age) {
-    toast.error("Please fill in all fields");
-    return;
-  }
+	const isValidEmail = (email: string): boolean => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	};
 
-  setLoading(true);
-  try {
-    // Đăng ký
-    await register({ username, password, fullName, age });
-    toast.success("Register successful!");
+	const handleRegister = async (e: React.FormEvent) => {
+		e.preventDefault();
+		const { username, password, confirmPassword, fullName, age } = registerForm;
 
-    // ✅ Đăng nhập tự động ngay sau đăng ký
-    const response = await login({ username, password });
-		console.log(response);		
+		if (!username || !password || !fullName || !age) {
+			toast.error("Please fill in all fields");
+			return;
+		}
 
-    // ✅ Điều hướng tới trang chỉnh sửa hồ sơ
-    navigate("/edit-first-time");
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      console.error("Register or login error:", err);
-      toast.error(err.message);
-    } else {
-      toast.error("An unexpected error occurred. Please try again.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+		if (!isValidEmail(username)) {
+			toast.error("Invalid email format");
+			return;
+		}
 
+		if (password !== confirmPassword) {
+			toast.error("Passwords do not match");
+			return;
+		}
+
+		if (!isValidPassword(password)) {
+			toast.error(
+				"Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number."
+			);
+			return;
+		}
+
+		if (age < 0 || age > 120) {
+			toast.error("Please enter a valid age");
+			return;
+		}
+
+		setLoading(true);
+		try {
+			// Đăng ký
+			await register({ username, password, fullName, age });
+			toast.success("Register successful!");
+
+			// ✅ Đăng nhập tự động ngay sau đăng ký
+			const response = await login({ username, password });
+			console.log(response);
+
+			// ✅ Điều hướng tới trang chỉnh sửa hồ sơ
+			navigate("/edit-first-time");
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				console.error("Register or login error:", err);
+				toast.error(err.message);
+			} else {
+				toast.error("An unexpected error occurred. Please try again.");
+			}
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return (
 		<div className="login">
@@ -160,6 +192,24 @@ const handleRegister = async (e: React.FormEvent) => {
 									value={registerForm.password}
 									onChange={handleRegisterChange}
 									placeholder="Enter your password"
+									required
+								/>
+								<button
+									type="button"
+									className="toggle"
+									onClick={toggleRegisterPassword}
+								>
+									{registerForm.showPassword ? <Eye /> : <EyeOff />}
+								</button>
+							</div>
+							<div className="input-group password">
+								<label>Confirm password </label>
+								<input
+									type={registerForm.showPassword ? "text" : "password"}
+									name="confirmPassword"
+									value={registerForm.confirmPassword}
+									onChange={handleRegisterChange}
+									placeholder="Enter your confirm password"
 									required
 								/>
 								<button
@@ -221,7 +271,7 @@ const handleRegister = async (e: React.FormEvent) => {
 					<span className="title">Login</span>
 					<form className="form" onSubmit={handleLogin}>
 						<div className="input-group">
-							<label htmlFor="username">username</label>
+							<label htmlFor="username">Email</label>
 							<input
 								type="text"
 								name="username"
@@ -264,7 +314,7 @@ const handleRegister = async (e: React.FormEvent) => {
 							className="social-btn wavelink"
 							onClick={() => setShowModal(true)}
 						>
-							<img src={logo} alt="" />
+							Register
 						</button>
 					</div>
 				</div>

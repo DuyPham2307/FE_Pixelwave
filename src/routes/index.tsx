@@ -17,26 +17,39 @@ import Settings from "@/pages/user/Settings";
 import Profile from "@/pages/user/Profile";
 import GoogleCallback from "@/components/SwitchPage/GoogleCallback";
 import EditNewProfile from "@/pages/EditNewProfile";
+import AuththenRoute from "@/components/Route/AuthenRoute";
+import PublicRoute from "@/components/Route/PublicRoute";
 
 const AppRoutes = () => {
 	return (
 		<Router>
 			<Routes>
 				{/* Route cho đăng nhập */}
-				<Route
-					path="/"
-					element={
-						<AuthLayout>
-							<Login />
-						</AuthLayout>
-					}
-				/>
-				<Route
+				{/* <Route
 					path="/login"
 					element={
 						<AuthLayout>
 							<Login />
 						</AuthLayout>
+					}
+				/> */}
+				<Route
+					path="/login"
+					element={
+						<PublicRoute>
+							<AuthLayout>
+								<Login />
+							</AuthLayout>
+						</PublicRoute>
+					}
+				/>
+
+				<Route
+					path="/"
+					element={
+						<AuththenRoute>
+							<div>Loading...</div>
+						</AuththenRoute>
 					}
 				/>
 

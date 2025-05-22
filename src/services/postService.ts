@@ -89,22 +89,25 @@ export const getPostFromUserId = async (
 	}
 };
 
-export const getFeed = async (): Promise<PostDetail[]> => {
-	try {
-		const response = await api.get<PostDetail[]>(`/api/feed`);
-		return response.data;
-	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			console.error("getFeed failed in axios:", error);
-			throw new Error(
-				"Request failed: " + (error.response?.data?.message || "Unknown error")
-			);
-		} else {
-			console.error("getFeed failed:", error);
-			throw new Error("Unexpected error occurred.");
-		}
-	}
+export const getFeed = async (limit: number = 10): Promise<PostDetail[]> => {
+  try {
+    const response = await api.get<PostDetail[]>(`/api/feed`, {
+      params: { size: limit }
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("getFeed failed in axios:", error);
+      throw new Error(
+        "Request failed: " + (error.response?.data?.message || "Unknown error")
+      );
+    } else {
+      console.error("getFeed failed:", error);
+      throw new Error("Unexpected error occurred.");
+    }
+  }
 };
+
 
 export const toggleLikePost = async (postId: number) => {
 	try {

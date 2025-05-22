@@ -4,6 +4,7 @@ import "@/styles/components/_editNewProfileCard.scss";
 import { updateAvatar, updateUserProfile } from "@/services/userService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AvatarCropModal from "../Modal/AvatarCropModal/AvatarCropModal";
 
 const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const { avatar, bio, gender, phoneNumber, fullName, age } = props;
@@ -13,11 +14,14 @@ const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 		gender,
 		phoneNumber,
 	});
+	const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 	const [avatarFile, setAvatarFile] = useState<File>(null!); // khởi tạo avatarFile với giá trị null
 	const [avatarPreview, setAvatarPreview] = useState<string>(avatar); // dùng avatar từ props ban đầu
 	const navigate = useNavigate();
 
-	const handleChangeData = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChangeData = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+	) => {
 		const { name, value } = e.target;
 		setUserData((prev) => ({ ...prev, [name]: value }));
 	};
@@ -26,14 +30,14 @@ const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 		const file = e.target.files?.[0];
 		if (file) {
 			setAvatarFile(file);
-
-			// Tạo preview URL
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setAvatarPreview(reader.result as string);
-			};
-			reader.readAsDataURL(file);
+			setIsCropModalOpen(true); // Mở modal crop ảnh
 		}
+	};
+
+	const handleCroppedAvatar = (cropped: File) => {
+		setAvatarFile(cropped);
+		setAvatarPreview(URL.createObjectURL(cropped));
+		setIsCropModalOpen(false);
 	};
 
 	const handleUpdateProfile = async () => {
@@ -46,14 +50,7 @@ const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 			toast.error("Vui lòng nhập số điện thoại");
 			return;
 		}
-		if (!userData.age) {
-			toast.error("Vui lòng nhập tuổi");
-			return;
-		}
-		if (!userData.bio) {
-			toast.error("Vui lòng nhập bio");
-			return;
-		}
+
 		if (!userData.gender) {
 			toast.error("Vui lòng nhập giới tính");
 			return;
@@ -63,6 +60,13 @@ const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 			// Gọi API updateAvatar
 			await updateAvatar(avatarFile, "test");
 			toast.success("Cập nhật ảnh đại diện thành công");
+			// Cập nhật lại avatar trong state
+			const storedUser = localStorage.getItem("user");
+			const userObj = storedUser ? JSON.parse(storedUser) : null;
+			if (userObj) {
+				userObj.avatar = avatarPreview;
+			}
+			localStorage.setItem("user", JSON.stringify(userObj));
 
 			// Gọi API updateUserProfile
 			await updateUserProfile(userData);
@@ -111,14 +115,16 @@ const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 							placeholder="Bio"
 							className="edit-profile__input"
 						/>
-						<input
-							type="text"
+						<select
 							name="gender"
 							value={userData.gender || ""}
 							onChange={handleChangeData}
-							placeholder="Gender"
 							className="edit-profile__input"
-						/>
+						>
+							<option value="">Select Gender</option>
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+						</select>
 						<input
 							type="text"
 							name="age"
@@ -143,6 +149,13 @@ const EditNewProfileCard: React.FC<UserDetailResponse> = (props) => {
 			>
 				Cập nhật
 			</button>
+
+			<AvatarCropModal
+				isOpen={isCropModalOpen}
+				imageFile={avatarFile}
+				onClose={() => setIsCropModalOpen(false)}
+				onCropComplete={handleCroppedAvatar}
+			/>
 		</div>
 	);
 };

@@ -4,7 +4,7 @@ import { UserDetailResponse } from "@/models/UserModel";
 import { PostDetail, PostRequestPage, PostSimple } from "@/models/PostModel";
 import { getPostFromId, getPostFromUserId } from "@/services/postService";
 import "@/styles/components/_profileCard.scss";
-import { Ban, Command, Heart, LayoutGrid, SquarePen, Tags } from "lucide-react";
+import { Ban, Cake, Command, Heart, LayoutGrid, Phone, SquarePen, Tags, VenusAndMars } from "lucide-react";
 import toast from "react-hot-toast";
 import PostDetails from "./../Post/PostDetails";
 
@@ -80,11 +80,11 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 							{props.followingCount} followings
 						</span>
 					</div>
+					<p>{props.bio}</p>
 					<div className="introduce">
-						<p>{props.bio}</p>
-						<p>Gender: {props.gender}</p>
-						<p>Age: {props.age}</p>
-						<p>Phone number: {props.phoneNumber}</p>
+						<p><VenusAndMars /> {props.gender}</p>
+						<p><Cake /> {props.age}</p>
+						<p><Phone /> {props.phoneNumber}</p>
 					</div>
 				</div>
 			</div>

@@ -74,7 +74,7 @@
 			}
 
 			.quantity {
-				margin-top: 0.5rem;
+				margin-bottom: 10px;
 				span {
 					margin-right: 1.5rem;
 					font-size: 1rem;
@@ -82,11 +82,18 @@
 				}
 			}
 
-			.introduce {
-				margin-top: 1rem;
+			.introduce{
+				display: flex;
+				flex-direction: row;
+				gap: 1rem;
+
 				p {
-					margin: 0.2rem 0;
+					display: flex;
+					flex-direction: row;
+					gap: 8px;
 					color: #333;
+					font-size: 1rem;
+					font-weight: 500;
 				}
 			}
 		}

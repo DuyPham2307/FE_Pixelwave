@@ -39,12 +39,12 @@ const Sidebar = () => {
                         Messager
                     </Link>
                 </li>
-                <li className={`item ${currentPath === "settings" ? "isLocate" : ""}`}>
+                {/* <li className={`item ${currentPath === "settings" ? "isLocate" : ""}`}>
                     <Link to="/user/settings">
                         <Settings />
                         Settings
                     </Link>
-                </li>
+                </li> */}
             </ul>
         </div>
     );

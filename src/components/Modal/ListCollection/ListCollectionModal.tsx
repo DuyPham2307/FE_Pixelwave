@@ -1,9 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { CollectionResponseDTO } from "@/models/CollectionModel";
 import { addPostToCollection, getUserCollections } from "@/services/collectionService";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "@/styles/components/_listCollectionModal.scss";
 import toast from "react-hot-toast";
+import CreateCollectionModal from "../CreateCollection/CreateCollectionModal";
 
 interface ListCollectionProps {
   postId: number;
@@ -12,6 +13,7 @@ interface ListCollectionProps {
 
 const ListCollection: React.FC<ListCollectionProps> = ({ onClose, postId }) => {
 	const { user } = useAuth();
+		const [showModal, setShowModal] = useState(false);
 	const [listCollection, setListCollection] = React.useState<
 		CollectionResponseDTO[]
 	>([]);
@@ -44,19 +46,29 @@ const ListCollection: React.FC<ListCollectionProps> = ({ onClose, postId }) => {
 
 	return (
 		<div className="list-collection-modal">
+			{showModal && <CreateCollectionModal closeModal={() => setShowModal(false)} />	}
 			<div className="modal-content">
-      <h1>Danh sách collection: </h1>
+      <h1>Lưa vào</h1>
 				<button className="close-btn" onClick={onClose}>
 					×
 				</button>
-				{listCollection.map((collection) => (
-					<div key={collection.id} className="collection-item" onClick={() => handleSelectCollection(collection.id)}>
-						<h3>Collection title: {collection.title}</h3>
-						<p>Collection description{collection.description}</p>
-						<p>Count: {collection.postCount}</p>
-						<p>Privacy: {collection.isPublic ? "Public" : "Private"}</p>
-					</div>
-				))}
+				<div className="modal-collection-list">
+					{listCollection.length === 0 && "Chưa có bộ sưu tập nào"}
+					{listCollection.map((collection) => (
+						<div key={collection.id} className="collection-item" onClick={() => handleSelectCollection(collection.id)}>
+							<h3>{collection.title}</h3>
+							<p>{collection.description}</p>
+							<p>Count: {collection.postCount}</p>
+							<p>{collection.isPublic ? "Public" : "Private"}</p>
+						</div>
+					))}
+				</div>
+				<div className="create-new-collection">
+					<button className="create-new-collection-btn" onClick={() => setShowModal(true)}>
+						+
+					</button>
+					<p className="create-new-collection-text">Bộ sưu tập mới</p>
+				</div>
 			</div>
 		</div>
 	);

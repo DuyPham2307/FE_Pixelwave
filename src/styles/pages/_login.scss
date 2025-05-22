@@ -371,9 +371,10 @@
 						box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2); // gray-400
 					}
 
-					&.wavelink>img{
+					&.wavelink{
 						height: 60px;
 						width: auto;
+						font-size: 1.125rem;
 					}
 				}
 			}

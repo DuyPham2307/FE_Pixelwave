@@ -3,7 +3,6 @@ import "@/styles/components/_post.scss"; // Import your CSS file
 import {
 	MessageCircle,
 	Ellipsis,
-	ChevronDown,
 	Globe,
 	Users,
 	Lock,
@@ -113,7 +112,7 @@ const PostCard: React.FC<PostProps> = (props) => {
 							{isLiked ? <Heart fill="red" color="red" /> : <Heart />}
 							<span>{likeCount}</span>
 						</button>
-						<button className="comment-btn">
+						<button className="comment-btn" onClick={() => setShowDetail(true)}>
 							<MessageCircle />
 							<span>{post.commentCount}</span>
 						</button>
@@ -124,9 +123,9 @@ const PostCard: React.FC<PostProps> = (props) => {
 							<Bookmark />
 						</button>
 					</div>
-					<button className="see-more" onClick={() => setShowDetail(true)}>
+					{/* <button className="see-more" onClick={() => setShowDetail(true)}>
 						See more <ChevronDown />
-					</button>
+					</button> */}
 				</>
 			)}
 		</div>
