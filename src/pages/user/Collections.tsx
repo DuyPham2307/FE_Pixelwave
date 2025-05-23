@@ -34,6 +34,7 @@ const CollectionsPage = () => {
 	const loadCollections = async () => {
 		const data = await getUserCollections();
 		setCollections(data);
+		setSelectedCollection(data[0]);
 	};
 
 	const selectCollection = async (collection: CollectionResponseDTO) => {
@@ -126,7 +127,9 @@ const CollectionsPage = () => {
 						</div>
 					</div>
 				) : (
-					<h2></h2>
+					<div className="collection-blank">
+						<span>Create collection now</span>
+					</div>
 				)}
 			</main>
 			{postDetails && (
