@@ -7,9 +7,7 @@ import {
 	getPostsInCollection,
 	// removePostFromCollection,
 } from "@/services/collectionService";
-import {
-	CollectionResponseDTO,
-} from "@/models/CollectionModel";
+import { CollectionResponseDTO } from "@/models/CollectionModel";
 import { PostDetail, PostSimple } from "@/models/PostModel";
 import "@/styles/pages/_collection.scss";
 import toast from "react-hot-toast";
@@ -43,29 +41,6 @@ const CollectionsPage = () => {
 		const postList = await getPostsInCollection(collection.id);
 		setPosts(postList);
 	};
-
-	// const handleCreate = async () => {
-	// 	const data: CollectionRequestDTO = {
-	// 		title: newCollectionName,
-	// 		isPublic,
-	// 		description: newDescription,
-	// 	};
-	// 	if (!data.title) {
-	// 		toast.error("Collection title is required.");
-	// 		return;
-	// 	}
-	// 	if (!data.description) {
-	// 		toast.error("Collection description is required.");
-	// 		return;
-	// 	}
-	// 	const newCollection = await createCollection(data);
-	// 	setCollections([...collections, newCollection]);
-	// 	setShowModal(false);
-	// 	setNewCollectionName("");
-	// 	setNewDescription("");
-	// 	setIsPulic(true);
-	// 	toast.success("Create collection successfully!");
-	// };
 
 	const handleDelete = async (collectionId: number) => {
 		await deleteCollection(collectionId);
@@ -112,9 +87,9 @@ const CollectionsPage = () => {
 							</div>
 
 							<p className="collection-title">{collection.title}</p>
-							<p className="collection-privacy">
+							{/* <p className="collection-privacy">
 								{collection.isPublic ? "Public" : "Private"}
-							</p>
+							</p> */}
 							<p className="collection-description">{collection.description}</p>
 						</div>
 					))}
@@ -151,7 +126,7 @@ const CollectionsPage = () => {
 						</div>
 					</div>
 				) : (
-					<h2>Select a collection to view its posts.</h2>
+					<h2></h2>
 				)}
 			</main>
 			{postDetails && (
@@ -159,7 +134,6 @@ const CollectionsPage = () => {
 					post={postDetails}
 					key={postDetails.id}
 					onClose={() => setPostDetails(null)}
-					onLikeChanged={() => {}}
 				/>
 			)}
 			{showModal && (

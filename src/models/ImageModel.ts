@@ -46,3 +46,9 @@ export interface ImagePageResponse<T> {
   first: boolean;
   empty: boolean;
 }
+
+export interface TagResponseDTO{
+  id: number;
+  name: string;
+  imageCount: number;
+}

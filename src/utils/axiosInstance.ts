@@ -67,7 +67,9 @@ api.interceptors.response.use(
 
 					// Nếu làm mới thành công, lưu lại accessToken mới
 					const newAccessToken = response.data.accessToken;
+					const newRefreshToken = response.data.refreshToken;
 					localStorage.setItem("accessToken", newAccessToken);
+					localStorage.setItem("refreshToken", newRefreshToken);
 
 					// Thêm accessToken mới vào lại header của yêu cầu ban đầu
 					originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;

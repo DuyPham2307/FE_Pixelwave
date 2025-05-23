@@ -23,9 +23,13 @@
 			border: none;
 			cursor: pointer;
 
-			:hover{
+			:hover {
 				opacity: 0.9;
 			}
+
+			// &.active{
+			// 	background: #000;
+			// }
 		}
 
 		.collection-list {
@@ -64,7 +68,7 @@
 						pointer-events: none;
 						transition: opacity 0.2s ease;
 
-						svg{
+						svg {
 							width: 16px;
 						}
 					}
@@ -85,6 +89,11 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 					max-width: 250px;
+				}
+
+				.collection-title {
+					font-weight: bold;
+					font-size: 1.125rem;
 				}
 
 				.collection-privacy {

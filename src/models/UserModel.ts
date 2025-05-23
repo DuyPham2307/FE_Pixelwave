@@ -30,7 +30,7 @@ export interface UserFirstUpload {
 
 export interface UserDTO {
   id: number;
-  username: string;
+  fullName: string;
   avatar: string;
 }
 

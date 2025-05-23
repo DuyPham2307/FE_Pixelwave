@@ -100,12 +100,12 @@ export const getListFriends = async (userId: number): Promise<UserDTO[]> => {
 		return res.data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
-			console.error("rejectFriendRequest axios error:", error);
+			console.error("getListFriend axios error:", error);
 			throw new Error(
-				error.response?.data?.message || "Failed to reject friend request."
+				error.response?.data?.message || "Failed to getListFriend."
 			);
 		} else {
-			console.error("rejectFriendRequest unknown error:", error);
+			console.error("getListFriend unknown error:", error);
 			throw new Error("Unexpected error occurred.");
 		}
 	}
@@ -157,3 +157,52 @@ export const getBlockedUsers = async (): Promise<UserDetailResponse[]> => {
 		}
 	}
 };
+
+export const followUser = async (userId: number): Promise<void> => {
+	try {
+		await api.post(`/api/user/${userId}/follow`);
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("follow User axios error:", error);
+			throw new Error(
+				error.response?.data?.message || "Failed to follow user."
+			);
+		} else {
+			console.error("follow User unknown error:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+};
+
+export const unFollowUser = async (userId: number): Promise<void> => {
+	try {
+		await api.post(`/api/user/${userId}/unfollow`);
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("unfollow User axios error:", error);
+			throw new Error(
+				error.response?.data?.message || "Failed to unfollow user."
+			);
+		} else {
+			console.error("unfollow User unknown error:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+};
+
+export const getFollowers = async (userId: number) : Promise<UserDTO[]> => {
+	try {
+		const res = await api.get(`/api/user/${userId}/followers`);
+		return res.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("getFollowers axios error:", error);
+			throw new Error(
+				error.response?.data?.message || "Failed to getFollowers."
+			);
+		} else {
+			console.error("getFollowers unknown error:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+}

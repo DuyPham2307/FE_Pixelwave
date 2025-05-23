@@ -53,15 +53,15 @@ const SuggestionBar = () => {
 				<div className="list">
 					{userRecommend.map((user) => (
 						<div key={user.id} className="item">
-							<img src={user.avatar} alt={user.fullName} className="avatar" />
+							<img src={user.avatar || "https://avatar.iran.liara.run/public/30"} alt={user.fullName} className="avatar" />
 							<div className="info">
 								<h3 className="name">
 									<a href={`/user/${user.id}`}>{user.fullName}</a>
 								</h3>
 								<p className="desc">
 									{user.mutualFriendsCount > 0
-										? `+${user.mutualFriendsCount} friend`
-										: "Don't have friend"}
+										? `${user.mutualFriendsCount} mutual friend`
+										: ""}
 								</p>
 							</div>
 							<button onClick={() => requestAddFriend(user.id)} className="direct">

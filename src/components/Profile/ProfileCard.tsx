@@ -17,7 +17,14 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import PostDetails from "./../Post/PostDetails";
-import { addFriend } from "@/services/friendService";
+import {
+	addFriend,
+	blockUser,
+	followUser,
+	unblockUser,
+	unFollowUser,
+} from "@/services/friendService";
+import ListUserRelationship from "../Modal/ListUserRelationship/ListUserRelationship";
 
 const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const { user } = useAuth();
@@ -27,6 +34,10 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const isMyWall = myId === profileUserId;
 	const [fetchPosts, setFetchPosts] = useState<PostSimple[]>([]);
 	const [detailPost, setDetailPost] = useState<PostDetail | null>(null);
+	const [typeRelationShipModal, setTypeRelationShipModal] =
+		useState<string>("");
+	const [showModalRelationShip, setShowModalRelationShip] =
+		useState<boolean>(false);
 
 	useEffect(() => {
 		const fetchUserPost = async () => {
@@ -66,8 +77,60 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 		}
 	};
 
+	const requestFollow = async (userId: number) => {
+		try {
+			await followUser(userId);
+			toast.success("Send follow request success!");
+		} catch (error) {
+			console.log(error);
+			toast.error("Send follow request fail!");
+		}
+	};
+
+	const requestUnFollow = async (userId: number) => {
+		try {
+			await unFollowUser(userId);
+			toast.success("Send unfollow request success!");
+		} catch (error) {
+			console.log(error);
+			toast.error("Send unfollow request fail!");
+		}
+	};
+
+	const requestBlock = async (userId: number) => {
+		try {
+			await blockUser(userId);
+			toast.success("Send unfollow request success!");
+		} catch (error) {
+			console.log(error);
+			toast.error("Send unfollow request fail!");
+		}
+	};
+
+	const requestUnBlock = async (userId: number) => {
+		try {
+			await unblockUser(userId);
+			toast.success("Send unfollow request success!");
+		} catch (error) {
+			console.log(error);
+			toast.error("Send unfollow request fail!");
+		}
+	};
+
+	const handleOpenModalRelationship = (type: string) => {
+		setTypeRelationShipModal(type);
+		setShowModalRelationShip(true);
+	}
+
 	return (
 		<div className="profile-container">
+			{showModalRelationShip && (
+				<ListUserRelationship
+					userId={props.id}
+					type={typeRelationShipModal}
+					onClose={() => setShowModalRelationShip(false)}
+				/>
+			)}
 			{detailPost ? (
 				<PostDetails post={detailPost} onClose={() => setDetailPost(null)} />
 			) : (
@@ -81,6 +144,9 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 						{isMyWall ? undefined : (
 							<div className="interaction">
 								<button className="follow">Following</button>
+								{/* check follow 
+								=> hiển thị follow > requestFollow(props.id)
+								=> hiển thị followwing > requestUnFollow(props.id) */}
 								<button
 									className="addFriend"
 									onClick={() => requestAddFriend(props.id)}
@@ -88,6 +154,9 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 									+ Add friend
 								</button>
 								<button className="block">
+									{/* check block 
+								=> hiển thị block > requestBlock(props.id)
+								=> hiển thị unblock > requestUnBlock(props.id) */}
 									<Ban /> Block
 								</button>
 							</div>
@@ -95,12 +164,13 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 					</div>
 					<div className="quantity">
 						<span className="post-count">{props.postCount} post</span>
-						<span className="followers-count">
+						<span className="followers-count" onClick={() => handleOpenModalRelationship('follower')}>
 							{props.followerCount} followers
 						</span>
 						<span className="followings-count">
 							{props.followingCount} followings
 						</span>
+						<span className="friends-count" onClick={() => handleOpenModalRelationship('friend')}>{props.friendCount} friends</span>
 					</div>
 					<p>{props.bio}</p>
 					<div className="introduce">

@@ -5,7 +5,7 @@ import CarouselImage from "./CarouselImage";
 import { getCommentsByPostId } from "@/services/commentService";
 
 import "@/styles/components/_postDetail.scss";
-import { formatTimestamp } from "@/utils/formatTimestamp";
+import { formatRelativeTime, formatTimestamp } from "@/utils/formatTimestamp";
 import CommentList from "./../Comment/CommentList";
 import CommentForm from "./../Comment/CommentForm";
 import { CommentResponseDTO } from "@/models/CommentModel";
@@ -28,6 +28,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 	const [comments, setComments] = useState<CommentResponseDTO[]>([]);
 	const [showModalCollection, setShowModalCollection] = useState(false);
+	const [commentWantReply, setCommentWantReply] = useState<CommentResponseDTO | null>(null)
 
 	const fetchComments = async () => {
 		try {
@@ -111,7 +112,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 									</div>
 								</div>
 								<span className="timestamp">
-									{formatTimestamp(post.createdAt)}
+									{formatRelativeTime(post.createdAt)}
 								</span>
 							</div>
 						</div>
@@ -122,6 +123,8 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 							<CommentList
 								comments={comments}
 								onCommentUpdated={fetchComments}
+								setParentComment={setCommentWantReply}
+								postId={post.id}
 							/>
 						</div>
 
@@ -138,7 +141,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 							</button>
 						</div>
 						<div className="post-send-comment">
-							<CommentForm postId={post.id} onCommentAdded={fetchComments} />
+							<CommentForm postId={post.id} onCommentAdded={fetchComments} parentComment={commentWantReply} />
 						</div>
 					</div>
 				</div>

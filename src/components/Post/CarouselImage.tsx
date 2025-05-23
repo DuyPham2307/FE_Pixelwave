@@ -30,7 +30,7 @@ const CarouselImage: React.FC<CarouselImageProps> = (props) => {
 				<ChevronLeft />
 			</button>
 			<img
-				src={img_urls[currentImageIndex].url || ""}
+				src={img_urls[currentImageIndex]?.url || ""}
 				alt={`Post Image ${currentImageIndex + 1}`}
 				className={`post-image`}
 			/>

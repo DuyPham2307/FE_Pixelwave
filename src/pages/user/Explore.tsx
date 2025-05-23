@@ -1,4 +1,5 @@
 import "@/styles/pages/_explore.scss";
+import "@/styles/_animate.scss";
 import PostDetails from "@/components/Post/PostDetails";
 import { PostDetail } from "@/models/PostModel";
 import { getPostFromId } from "@/services/postService";
@@ -7,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ImageTag, TagImageResponse } from "@/models/ImageModel";
 import { getImagesByTag, getTagForExplore } from "@/services/exploreService";
-import TagModal from "./../../components/Modal/TagModal/TagModal";
+import TagModal from "@/components/Modal/TagModal/TagModal";
 import Spinner from "@/components/Spinner/Spinner";
 
 const Explore: React.FC = () => {
@@ -20,6 +21,27 @@ const Explore: React.FC = () => {
 	const [showselectTagModal, setShowSelectTagModal] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isLoadingImages, setIsLoadingImages] = useState(false);
+
+	useEffect(() => {
+		const fetchFirstTagImage = async () => {
+			setIsLoading(true);
+			setSelectedTagId(23);
+			try {
+				const res = await getImagesByTag(23, 1, 20); // hoặc page, size tùy pagination
+				console.log(23);
+				setSelectedTagImages(res.content);
+				console.log(res.content);
+
+				toast.success("Loaded images for tag!");
+			} catch (error) {
+				console.error("Error loading images for tag:", error);
+				toast.error("Không thể tải ảnh của tag này.");
+			} finally {
+				setIsLoadingImages(false);
+			}
+		};
+		fetchFirstTagImage();
+	}, []);
 
 	useEffect(() => {
 		const fetchTags = async (): Promise<void> => {
@@ -65,37 +87,6 @@ const Explore: React.FC = () => {
 			toast.error("Can't Showpost from post Id");
 		}
 	};
-
-	const handleReact = async (): Promise<void> => {
-		try {
-			if (detailPost.liked) {
-				const res = await unlikePost(detailPost.id);
-				if (res.status !== 200) {
-					throw new Error("Unlike failed");
-				}
-				setIsLiked(false);
-				setLikeCount((prev) => Math.max(0, prev - 1));
-				toast.success("Unlike post successfully!");
-			} else {
-				const res = await likePost(detailPost.id);
-				if (res.status !== 200) {
-					throw new Error("Like failed");
-				}
-				setIsLiked(true);
-				setLikeCount((prev) => prev + 1);
-
-				toast.success("Like post successfully!");
-			}
-		} catch (error) {
-			console.error("Error handling reaction:", error);
-			toast.error("Có lỗi khi like/unlike");
-		}
-	};
-
-	if (isLoading) {
-		return <Spinner />;
-	}
-
 	return (
 		<div className="explore-container">
 			{showselectTagModal && (
@@ -106,26 +97,34 @@ const Explore: React.FC = () => {
 			)}
 
 			{detailPost ? (
-				<PostDetails
-					post={detailPost}
-					onClose={() => setDetailPost(null)}
-					onLikeChanged={handleReact}
-				/>
+				<PostDetails post={detailPost} onClose={() => setDetailPost(null)} />
 			) : (
 				""
 			)}
 			<div className="tag-posts">
-				{tagNames.map((tag) => (
-					<div
-						key={tag.id}
-						className={`tag-item ${selectedTagId === tag.id ? "active" : ""}`}
-						onClick={() => handleTagClick(tag.id)}
-					>
-						{tag.name}
+				<h1
+					className={`welcome-title ${
+						isLoading ? "animate-in-title" : "animate-out-title"
+					}`}
+				>
+					Welcome to the explore!!!
+				</h1>
+				<div
+					className={`tag-list isLoading ? "animate-in-content" : "animate-out-content"`}
+					style={{ display: isLoading ? "none" : "flex" }}
+				>
+					{tagNames.map((tag) => (
+						<div
+							key={tag.id}
+							className={`tag-item ${selectedTagId === tag.id ? "active" : ""}`}
+							onClick={() => handleTagClick(tag.id)}
+						>
+							{tag.name}
+						</div>
+					))}
+					<div className="tag-item" onClick={() => setShowSelectTagModal(true)}>
+						More <ChevronRight />
 					</div>
-				))}
-				<div className="tag-item" onClick={() => setShowSelectTagModal(true)}>
-					More <ChevronRight />
 				</div>
 			</div>
 			{selectedTagId ? (

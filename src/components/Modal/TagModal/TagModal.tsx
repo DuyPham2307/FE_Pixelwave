@@ -1,5 +1,5 @@
-import { ImageTag } from "@/models/ImageModel";
-import { getTagForExplore } from "@/services/exploreService";
+import { TagResponseDTO } from "@/models/ImageModel";
+import { getAllTagForExplore } from "@/services/exploreService";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import "@/styles/components/_tagModal.scss";
@@ -11,14 +11,14 @@ interface TagModalProps {
 }
 
 const TagModal: React.FC<TagModalProps> = ({ onClose, setTag }) => {
-	const [tagNames, setTagNames] = useState<ImageTag[]>([]);
+	const [tagNames, setTagNames] = useState<TagResponseDTO[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchTags = async (): Promise<void> => {
 			setIsLoading(true);
 			try {
-				const data = await getTagForExplore(50);
+				const data = await getAllTagForExplore();
 				setTagNames(data);
 				toast.success("Get tag successfully!");
 			} catch (error) {

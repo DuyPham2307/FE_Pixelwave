@@ -13,5 +13,5 @@ export interface CommentResponseDTO {
 export interface CommentRequestDTO {
   content: string;
   postId: number;
-  parentCommentId?: number; // optional, dùng cho reply
+  parentCommentId?: number | null; // optional, dùng cho reply
 };

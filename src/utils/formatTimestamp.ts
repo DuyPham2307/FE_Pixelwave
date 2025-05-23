@@ -25,3 +25,33 @@ export function formatTimestamp(isoString?: string): string {
 
   return `${day}-${month}-${year} ${hours}:${minutes}`;
 }
+
+export function formatRelativeTime(timestamp: string | Date): string {
+  const now = new Date();
+  const time = new Date(timestamp);
+  const diffMs = now.getTime() - time.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  if (diffMinutes < 60) {
+    return `${diffMinutes} phút trước`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours} giờ trước`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) {
+    return `${diffDays} ngày trước`;
+  }
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffDays < 60) { // tức dưới 2 tháng
+    return `${diffWeeks} tuần trước`;
+  }
+
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths} tháng trước`;
+}
+

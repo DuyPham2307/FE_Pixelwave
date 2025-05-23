@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "@/styles/pages/_home.scss";
 import { PostDetail } from "@/models/PostModel";
 import { getFeed } from "@/services/postService";
 import PostCard from "@/components/Post/PostCard";
 import { useNavigate } from "react-router-dom";
-import { UserDTO } from "@/models/UserModel";
+// import { UserDTO } from "@/models/UserModel";
 import { getListFriends } from "@/services/friendService";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,8 +14,9 @@ const Home: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [hasMore, setHasMore] = useState(true);
 
+	const homeRef = useRef<HTMLDivElement | null>(null);
 	const navigate = useNavigate();
-	const {user} = useAuth();
+	const { user } = useAuth();
 
 	const loadPosts = useCallback(async () => {
 		if (loading || !hasMore) return;
@@ -23,25 +24,22 @@ const Home: React.FC = () => {
 		setLoading(true);
 
 		try {
+			const prevDataLength = posts.length;
 			const data: PostDetail[] = await getFeed(limit);
-			const newPosts = data;
-			// Nếu số bài trả về ít hơn limit => hết bài
-			if (newPosts.length < limit) {
+
+			// Nếu API trả về 0 post => đã hết
+			if (data.length === prevDataLength) {
 				setHasMore(false);
+				return;
 			}
 
-			// So sánh để chỉ thêm bài mới (không trùng)
-			setPosts((prevPosts: PostDetail[]) => {
-				// Tạo map id bài cũ
-				const existingIds = new Set(prevPosts.map((p) => p.id));
-
-				// Lọc những bài mới chưa có trong prevPosts
-				const filteredNew = newPosts.filter((p) => !existingIds.has(p.id));
-
-				return [...prevPosts, ...filteredNew];
+			setPosts((prev) => {
+				const existingIds = new Set(prev.map((p) => p.id));
+				const filtered = data.filter((p) => !existingIds.has(p.id));
+				return [...prev, ...filtered];
 			});
 
-			// Tăng limit cho lần gọi tiếp theo
+			// Tăng limit (hoặc offset nếu cần phân trang)
 			setLimit((prev) => prev + 10);
 		} catch (error) {
 			console.error("Load posts error", error);
@@ -56,10 +54,13 @@ const Home: React.FC = () => {
 
 	// Scroll event để gọi loadPosts khi gần cuối
 	useEffect(() => {
+		const container = homeRef.current;
+		if (!container) return;
+
 		const onScroll = () => {
 			if (
-				window.innerHeight + window.scrollY >=
-					document.documentElement.scrollHeight - 200 &&
+				container.scrollTop + container.clientHeight >=
+					container.scrollHeight - 200 &&
 				hasMore &&
 				!loading
 			) {
@@ -67,8 +68,8 @@ const Home: React.FC = () => {
 			}
 		};
 
-		window.addEventListener("scroll", onScroll);
-		return () => window.removeEventListener("scroll", onScroll);
+		container.addEventListener("scroll", onScroll);
+		return () => container.removeEventListener("scroll", onScroll);
 	}, [loadPosts, hasMore, loading]);
 
 	useEffect(() => {
@@ -87,20 +88,16 @@ const Home: React.FC = () => {
 	}, [user]);
 
 	console.log("Posts: ", posts);
-	
 
 	return (
-		<div className="home">
+		<div className="home" ref={homeRef}>
 			{posts ? posts.map((post) => <PostCard key={post.id} post={post} />) : ""}
 			{loading && <p>Loading...</p>}
-      {!hasMore && (
-        <p
-          className="last-post"
-          onClick={() => navigate("/user/explore")}
-        >
-          No more posts. Explore now!
-        </p>
-      )}
+			{!hasMore && (
+				<p className="last-post" onClick={() => navigate("/user/explore")}>
+					No more posts. Explore now!
+				</p>
+			)}
 		</div>
 	);
 };
