@@ -12,6 +12,8 @@ export interface UserDetailResponse {
   followerCount: number;
   followingCount: number;
   friendCount: number;
+  isFollowing: boolean | null;
+  isFriend: boolean | null;
 }
 
 export interface UserDetail {

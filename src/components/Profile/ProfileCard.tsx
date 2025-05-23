@@ -120,7 +120,7 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const handleOpenModalRelationship = (type: string) => {
 		setTypeRelationShipModal(type);
 		setShowModalRelationShip(true);
-	}
+	};
 
 	return (
 		<div className="profile-container">
@@ -143,16 +143,36 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 						<span className="name">{props.fullName}</span>
 						{isMyWall ? undefined : (
 							<div className="interaction">
-								<button className="follow">Following</button>
-								{/* check follow 
-								=> hiển thị follow > requestFollow(props.id)
-								=> hiển thị followwing > requestUnFollow(props.id) */}
-								<button
-									className="addFriend"
-									onClick={() => requestAddFriend(props.id)}
-								>
-									+ Add friend
-								</button>
+								{props.isFollowing ? (
+									<button
+										className="follow"
+										onClick={() => requestUnFollow(props.id)}
+									>
+										Following
+									</button>
+								) : (
+									<button
+										className="follow"
+										onClick={() => requestFollow(props.id)}
+									>
+										+Follow
+									</button>
+								)}
+								{props.isFriend ? (
+									<button
+										className="addFriend"
+										onClick={() => requestAddFriend(props.id)}
+									>
+										Friend
+									</button>
+								) : (
+									<button
+										className="addFriend"
+										onClick={() => requestAddFriend(props.id)}
+									>
+										+ Add friend
+									</button>
+								)}
 								<button className="block">
 									{/* check block 
 								=> hiển thị block > requestBlock(props.id)
@@ -164,13 +184,21 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 					</div>
 					<div className="quantity">
 						<span className="post-count">{props.postCount} post</span>
-						<span className="followers-count" onClick={() => handleOpenModalRelationship('follower')}>
+						<span
+							className="followers-count"
+							onClick={() => handleOpenModalRelationship("follower")}
+						>
 							{props.followerCount} followers
 						</span>
 						<span className="followings-count">
 							{props.followingCount} followings
 						</span>
-						<span className="friends-count" onClick={() => handleOpenModalRelationship('friend')}>{props.friendCount} friends</span>
+						<span
+							className="friends-count"
+							onClick={() => handleOpenModalRelationship("friend")}
+						>
+							{props.friendCount} friends
+						</span>
 					</div>
 					<p>{props.bio}</p>
 					<div className="introduce">

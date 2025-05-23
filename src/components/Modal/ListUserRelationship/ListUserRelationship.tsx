@@ -1,6 +1,5 @@
 import { UserDTO } from "@/models/UserModel";
 import {
-	getBlockedUsers,
 	getFollowers,
 	getListFriends,
 } from "@/services/friendService";
