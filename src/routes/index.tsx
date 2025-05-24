@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import MainLayout from "@/layouts/MainLayout";
 import AuthLayout from "@/layouts/AuthLayout";
+import ChatLayout from "@/layouts/ChatLayout";
 import ProtectedRoute from "@/components/Route/ProtectedRoute";
 
 // Unlimited permit
@@ -109,9 +110,9 @@ const AppRoutes = () => {
 					<Route
 						path="/user/messenger"
 						element={
-							<MainLayout>
+							<ChatLayout>
 								<Messenger />
-							</MainLayout>
+							</ChatLayout>
 						}
 					/>
 					<Route

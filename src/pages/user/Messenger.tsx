@@ -1,11 +1,13 @@
 import React from 'react';
+import MessengerList from '@/components/Messenger/MessengerList';
+import MesssageChat from '@/components/Messenger/MessengerChat';
+import '@/styles/pages/_messager.scss'
 
 const Messenger: React.FC = () => {
   return (
-    <div className="messenger">
-      <h1>Messenger</h1>
-      <p>This is the chat interface where users can communicate with each other.</p>
-      {/* Chat interface components would go here */}
+    <div className="messanger">
+      <MessengerList />
+      <MesssageChat />
     </div>
   );
 };

@@ -4,7 +4,6 @@ import {
     Compass,
     House,
     MessageCircleMore,
-    Settings,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -33,18 +32,12 @@ const Sidebar = () => {
                         Collections
                     </Link>
                 </li>
-                <li className={`item ${currentPath === "messager" ? "isLocate" : ""}`}>
-                    <Link to="/user/messager">
+                <li className={`item ${currentPath === "messenger" ? "isLocate" : ""}`}>
+                    <Link to="/user/messenger">
                         <MessageCircleMore />
                         Messager
                     </Link>
                 </li>
-                {/* <li className={`item ${currentPath === "settings" ? "isLocate" : ""}`}>
-                    <Link to="/user/settings">
-                        <Settings />
-                        Settings
-                    </Link>
-                </li> */}
             </ul>
         </div>
     );
