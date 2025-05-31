@@ -23,7 +23,7 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 	const [taggedUserIds, setTaggedUserIds] = useState<number[] | null>(null);
 
 	const navigate = useNavigate();
-	const {user} = useAuth();
+	const { user } = useAuth();
 
 	const nextStep = () => setStep((prev) => prev + 1);
 	const prevStep = () => setStep((prev) => prev - 1);
@@ -31,7 +31,12 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 	const handlePost = async () => {
 		setLoading(true);
 		try {
-			console.log("Ingredient for post: ",{ caption, images, privacySetting, taggedUserIds });
+			console.log("Ingredient for post: ", {
+				caption,
+				images,
+				privacySetting,
+				taggedUserIds,
+			});
 			await uploadPost({ caption, images, privacySetting, taggedUserIds });
 			toast.success("Create a new post successful!");
 			onClose();
@@ -46,7 +51,7 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 			} else {
 				toast.error("An unexpected error occurred.");
 			}
-		} finally{
+		} finally {
 			setLoading(false);
 			navigate(`/user/${user?.id}`);
 		}
@@ -66,7 +71,12 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 					)}
 					{step === 2 && (
 						<motion.div key="step2" {...fadeAnim}>
-							<Step2 images={images} setImages={setImages} onPrev={prevStep} onNext={nextStep} />
+							<Step2
+								images={images}
+								setImages={setImages}
+								onPrev={prevStep}
+								onNext={nextStep}
+							/>
 						</motion.div>
 					)}
 					{step === 3 && (
@@ -78,6 +88,8 @@ const CreatePost = ({ onClose }: CreatePostProps) => {
 								setPrivacy={setPrivacySetting}
 								onPrev={prevStep}
 								onPost={handlePost}
+								taggedUserIds={taggedUserIds}
+								setTaggedUserIds={setTaggedUserIds}
 							/>
 						</motion.div>
 					)}

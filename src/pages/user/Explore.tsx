@@ -2,45 +2,42 @@ import "@/styles/pages/_explore.scss";
 import "@/styles/_animate.scss";
 import PostDetails from "@/components/Post/PostDetails";
 import { PostDetail } from "@/models/PostModel";
-import { getPostFromId } from "@/services/postService";
-import { ChevronRight, Heart } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { getPostById } from "@/services/postService";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { ImageTag, TagImageResponse } from "@/models/ImageModel";
 import { getImagesByTag, getTagForExplore } from "@/services/exploreService";
 import TagModal from "@/components/Modal/TagModal/TagModal";
 import Spinner from "@/components/Spinner/Spinner";
+import { useNavigate, useParams } from "react-router-dom";
+import NotFoundPage from "../NotFoundPage";
 
-const Explore: React.FC = () => {
+const Explore = () => {
+	const { tagId } = useParams();
+	const navigate = useNavigate();
+
 	const [tagNames, setTagNames] = useState<ImageTag[]>([]);
 	const [selectedTagImages, setSelectedTagImages] = useState<
 		TagImageResponse[]
 	>([]);
 	const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [isLastPage, setIsLastPage] = useState(false);
 	const [detailPost, setDetailPost] = useState<PostDetail | null>(null);
 	const [showselectTagModal, setShowSelectTagModal] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isLoadingImages, setIsLoadingImages] = useState(false);
+	const [notFound, setNotFound] = useState(false);
 
 	useEffect(() => {
-		const fetchFirstTagImage = async () => {
-			setIsLoading(true);
-			setSelectedTagId(23);
-			try {
-				const res = await getImagesByTag(23, 1, 20); // hoặc page, size tùy pagination
-				console.log(23);
-				setSelectedTagImages(res.content);
-				console.log(res.content);
-
-				toast.success("Loaded images for tag!");
-			} catch (error) {
-				console.error("Error loading images for tag:", error);
-				toast.error("Không thể tải ảnh của tag này.");
-			} finally {
-				setIsLoadingImages(false);
-			}
-		};
-		fetchFirstTagImage();
+		const parsedTagId = tagId ? parseInt(tagId) : NaN;
+		if (!tagId || isNaN(parsedTagId)) {
+			navigate("/user/explore/23", { replace: true });
+		} else {
+			setSelectedTagId(parsedTagId);
+			fetchImagesByTag(parsedTagId, 1);
+		}
 	}, []);
 
 	useEffect(() => {
@@ -60,33 +57,44 @@ const Explore: React.FC = () => {
 		fetchTags();
 	}, []);
 
-	const handleTagClick = async (tagId: number) => {
-		setSelectedTagId(tagId);
+	const fetchImagesByTag = async (tagId: number, page: number) => {
 		setIsLoadingImages(true);
 		try {
-			const res = await getImagesByTag(tagId, 1, 20); // hoặc page, size tùy pagination
-			console.log(tagId);
+			const res = await getImagesByTag(tagId, page, 20);
 			setSelectedTagImages(res.content);
-			console.log(res.content);
-
+			setCurrentPage(page);
+			setIsLastPage(res.content.length < 20); // nếu ít hơn 20 ảnh => là trang cuối
 			toast.success("Loaded images for tag!");
 		} catch (error) {
 			console.error("Error loading images for tag:", error);
 			toast.error("Không thể tải ảnh của tag này.");
+			setNotFound(true);
+			return;
 		} finally {
 			setIsLoadingImages(false);
 		}
 	};
 
+	// 3. Khi click tag mới
+	const handleTagClick = async (tagId: number) => {
+		setSelectedTagId(tagId);
+		navigate(`/user/explore/${tagId}`, { replace: true }); // update URL mà không reload
+		await fetchImagesByTag(tagId, 1); // fetch ảnh mới
+	};
+
 	const handleShowPost = async (postId: number) => {
 		try {
-			const res = await getPostFromId(postId);
+			const res = await getPostById(postId);
 			setDetailPost(res);
+			window.history.pushState({}, "", `/user/p/${postId}`);
 		} catch (error) {
 			console.error("Showpost error: ", error);
-			toast.error("Can't Showpost from post Id");
+			toast.error("Can't show post from post Id");
 		}
 	};
+	
+	if (notFound) return <NotFoundPage />;
+
 	return (
 		<div className="explore-container">
 			{showselectTagModal && (
@@ -97,7 +105,13 @@ const Explore: React.FC = () => {
 			)}
 
 			{detailPost ? (
-				<PostDetails post={detailPost} onClose={() => setDetailPost(null)} />
+				<PostDetails
+					post={detailPost}
+					onClose={() => {
+						setDetailPost(null);
+						window.history.pushState({}, "", `/user/explore/${tagId}`);
+					}}
+				/>
 			) : (
 				""
 			)}
@@ -110,7 +124,9 @@ const Explore: React.FC = () => {
 					Welcome to the explore!!!
 				</h1>
 				<div
-					className={`tag-list isLoading ? "animate-in-content" : "animate-out-content"`}
+					className={`tag-list ${
+						isLoading ? "animate-out-content" : "animate-in-content"
+					}`}
 					style={{ display: isLoading ? "none" : "flex" }}
 				>
 					{tagNames.map((tag) => (
@@ -127,32 +143,59 @@ const Explore: React.FC = () => {
 					</div>
 				</div>
 			</div>
-			{selectedTagId ? (
-				<div className="wall-posts">
-					{isLoadingImages ? (
-						<Spinner />
-					) : (
-						selectedTagImages.map((tagImage) => (
-							<div
-								className="item"
-								key={tagImage.imageId}
-								onClick={() => handleShowPost(tagImage.postId)}
-							>
-								<img src={tagImage.url} alt="Post image" />
-								<div className="counter">
-									<span>
-										{tagImage.likeCount} <Heart />
-									</span>
+			<div className="wall-post-wrapper">
+				{selectedTagId ? (
+					<div className="wall-posts">
+						{isLoadingImages ? (
+							<Spinner />
+						) : (
+							selectedTagImages.map((tagImage) => (
+								<div
+									className="item"
+									key={tagImage.imageId}
+									onClick={() => handleShowPost(tagImage.postId)}
+								>
+									<img src={tagImage.url} alt="Post image" />
+									<div className="counter">
+										<span>
+											{tagImage.likeCount} <Heart />
+										</span>
+									</div>
 								</div>
-							</div>
-						))
-					)}
-				</div>
-			) : (
-				<div className="blank-space">
-					<h1>Select 1 tags to explore about them!</h1>
-				</div>
-			)}
+							))
+						)}
+					</div>
+				) : (
+					<div className="blank-space">
+						<h1>Select 1 tags to explore about them!</h1>
+					</div>
+				)}
+			</div>
+			<div className="pagination-posts">
+				<button
+					className="prev-btn"
+					onClick={() => {
+						if (currentPage > 1 && selectedTagId) {
+							fetchImagesByTag(selectedTagId, currentPage - 1);
+						}
+					}}
+					disabled={currentPage === 1}
+				>
+					<ChevronLeft />
+				</button>
+				<span>{currentPage}</span>
+				<button
+					className="next-btn"
+					onClick={() => {
+						if (!isLastPage && selectedTagId) {
+							fetchImagesByTag(selectedTagId, currentPage + 1);
+						}
+					}}
+					disabled={isLastPage}
+				>
+					<ChevronRight />
+				</button>
+			</div>
 		</div>
 	);
 };

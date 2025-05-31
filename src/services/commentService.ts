@@ -9,11 +9,15 @@ export const createComment = async (
 		const formData = new FormData();
 		formData.append("content", comment.content);
 		formData.append("postId", comment.postId.toString());
-		if (
-			comment.parentCommentId !== null &&
-			comment.parentCommentId !== undefined
-		) {
+
+		if (comment.parentCommentId != null) {
 			formData.append("parentCommentId", comment.parentCommentId.toString());
+		}
+
+		if (comment.images) {
+			comment.images.forEach((file) => {
+				formData.append("images", file);
+			});
 		}
 
 		const response = await api.post("/api/v1/comments", formData, {
@@ -29,6 +33,7 @@ export const createComment = async (
 	}
 };
 
+
 export const updateComment = async (
 	commentId: number,
 	comment: CommentRequestDTO
@@ -37,11 +42,15 @@ export const updateComment = async (
 		const formData = new FormData();
 		formData.append("content", comment.content);
 		formData.append("postId", comment.postId.toString());
-		if (
-			comment.parentCommentId !== null &&
-			comment.parentCommentId !== undefined
-		) {
+
+		if (comment.parentCommentId != null) {
 			formData.append("parentCommentId", comment.parentCommentId.toString());
+		}
+
+		if (comment.images) {
+			comment.images.forEach((file) => {
+				formData.append("images", file);
+			});
 		}
 
 		const response = await api.put(`/api/v1/comments/${commentId}`, formData, {
@@ -56,6 +65,7 @@ export const updateComment = async (
 		throw error;
 	}
 };
+
 
 export const deleteComment = async (commentId: number): Promise<void> => {
 	try {

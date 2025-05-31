@@ -20,6 +20,13 @@ import GoogleCallback from "@/components/SwitchPage/GoogleCallback";
 import EditNewProfile from "@/pages/EditNewProfile";
 import AuththenRoute from "@/components/Route/AuthenRoute";
 import PublicRoute from "@/components/Route/PublicRoute";
+import PostPage from "@/pages/user/PostPage";
+import NotFoundPage from "@/pages/NotFoundPage";
+import AdminLayout from "@/layouts/AdminLayout";
+import Dashboard from "@/pages/admin/Dashboard";
+import Account from "@/pages/admin/Account";
+import PostReport from "@/pages/admin/PostReport";
+import UserReport from "@/pages/admin/UserReport";
 
 const AppRoutes = () => {
 	return (
@@ -84,6 +91,14 @@ const AppRoutes = () => {
 						}
 					/>
 					<Route
+						path="/user/explore/:tagId"
+						element={
+							<MainLayout>
+								<Explore />
+							</MainLayout>
+						}
+					/>
+					<Route
 						path="/user/profile"
 						element={
 							<MainLayout>
@@ -123,10 +138,51 @@ const AppRoutes = () => {
 							</MainLayout>
 						}
 					/>
+					<Route
+						path="/user/p/:postId"
+						element={
+							<MainLayout>
+								<PostPage />
+							</MainLayout>
+						}
+					/>
 				</Route>
 
 				{/* Các route khác cho admin hoặc chưa xác thực */}
 				{/* Các route admin có thể ở đây khi có role 'ADMIN' */}
+					<Route
+						path="/admin/"
+						element={
+							<AdminLayout>
+								<Dashboard />
+							</AdminLayout>
+						}
+					/>
+					<Route
+						path="/admin/accounts"
+						element={
+							<AdminLayout>
+								<Account />
+							</AdminLayout>
+						}
+					/>
+					<Route
+						path="/admin/post-reports"
+						element={
+							<AdminLayout>
+								<PostReport />
+							</AdminLayout>
+						}
+					/>
+					<Route
+						path="/admin/user-reports"
+						element={
+							<AdminLayout>
+								<UserReport />
+							</AdminLayout>
+						}
+					/>
+				<Route path="*" element={<NotFoundPage />} />
 			</Routes>
 		</Router>
 	);

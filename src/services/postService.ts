@@ -41,11 +41,13 @@ export const uploadPost = async (payload: UploadPost): Promise<void> => {
 	}
 };
 
-export const getPostFromId = async (postId: number): Promise<PostDetail> => {
+export const getPostById = async (postId: number): Promise<PostDetail> => {
 	try {
-		const response = await api.get<PostDetail>(`/api/post/${postId}`);
+		const response = await axios.get<PostDetail>(
+			`${import.meta.env.VITE_API_URL}/api/post/${postId}`
+		);
 		return response.data;
-	} catch (error) {
+	}  catch (error) {
 		if (axios.isAxiosError(error)) {
 			console.error("getPostFromId failed in axios:", error);
 			throw new Error(
@@ -56,6 +58,20 @@ export const getPostFromId = async (postId: number): Promise<PostDetail> => {
 			throw new Error("Unexpected error occurred.");
 		}
 	}
+	// try {
+	// 	const response = await api.get<PostDetail>(`/api/post/${postId}`);
+	// 	return response.data;
+	// } catch (error) {
+	// 	if (axios.isAxiosError(error)) {
+	// 		console.error("getPostFromId failed in axios:", error);
+	// 		throw new Error(
+	// 			"Request failed: " + error.response?.data?.message || "Unknown error"
+	// 		);
+	// 	} else {
+	// 		console.error("getPostFromId failed:", error);
+	// 		throw new Error("Unexpected error occurred.");
+	// 	}
+	// }
 };
 
 export const getPostFromUserId = async (
@@ -90,24 +106,23 @@ export const getPostFromUserId = async (
 };
 
 export const getFeed = async (limit: number = 10): Promise<PostDetail[]> => {
-  try {
-    const response = await api.get<PostDetail[]>(`/api/feed`, {
-      params: { size: limit }
-    });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error("getFeed failed in axios:", error);
-      throw new Error(
-        "Request failed: " + (error.response?.data?.message || "Unknown error")
-      );
-    } else {
-      console.error("getFeed failed:", error);
-      throw new Error("Unexpected error occurred.");
-    }
-  }
+	try {
+		const response = await api.get<PostDetail[]>(`/api/feed`, {
+			params: { size: limit },
+		});
+		return response.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("getFeed failed in axios:", error);
+			throw new Error(
+				"Request failed: " + (error.response?.data?.message || "Unknown error")
+			);
+		} else {
+			console.error("getFeed failed:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
 };
-
 
 export const likePost = async (postId: number) => {
 	try {
@@ -137,5 +152,50 @@ export const unlikePost = async (postId: number) => {
 	}
 };
 
+export const getPostTagged = async (
+	payload: PostRequestPage
+): Promise<PostSimplePage> => {
+	try {
+		const { userId, page, size, sortBy, sortDirection } = payload;
+		const response = await api.get<PostSimplePage>(
+			`/api/user/${userId}/tagged-posts`,
+			{
+				params: {
+					size,
+					page,
+					sortBy,
+					sortDirection,
+				},
+			}
+		);
 
+		return response.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("getPostFromId failed in axios:", error);
+			throw new Error(
+				"Request failed: " + (error.response?.data?.message || "Unknown error")
+			);
+		} else {
+			console.error("getPostFromId failed:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+};
 
+export const deletePostById = async (postId: number): Promise<void> => {
+	try {
+		const response = await api.delete(`/api/post/${postId}`);
+		return response.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("deletePostById failed in axios:", error);
+			throw new Error(
+				"Request failed: " + (error.response?.data?.message || "Unknown error")
+			);
+		} else {
+			console.error("deletePostById failed:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+};

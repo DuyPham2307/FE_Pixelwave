@@ -21,7 +21,7 @@ const Sidebar = () => {
                     </Link>
                 </li>
                 <li className={`item ${currentPath === "explore" ? "isLocate" : ""}`}>
-                    <Link to="/user/explore">
+                    <Link to="/user/explore/23">
                         <Compass />
                         Explore
                     </Link>

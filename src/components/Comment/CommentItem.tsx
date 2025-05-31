@@ -6,7 +6,7 @@ import {
 	deleteComment,
 } from "@/services/commentService";
 import "@/styles/components/_commentItem.scss"; // Đường dẫn đến file CSS của bạn
-import { formatRelativeTime, formatTimestamp } from "@/utils/formatTimestamp";
+import { formatRelativeTime } from "@/utils/formatTimestamp";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 

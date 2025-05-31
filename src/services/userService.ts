@@ -70,3 +70,27 @@ export const updateUserProfile = async (userData: UserFirstUpload) => {
 		}
 	}
 };
+
+export const updatePassword = async (oldPass: string, newPass: string) => {
+	try {
+		const response = await api.put("/api/user/password", {
+			"oldPassword": oldPass,
+			"newPassword": newPass
+		});
+
+		// if (response.status !== 200) {
+		// 	throw new Error("Failed to update password");
+		// }
+		return response.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("update password in axios:", error);
+			throw new Error(
+				"Request failed: " + (error.response?.data?.message || "Unknown error")
+			);
+		} else {
+			console.error("update password failed:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+};

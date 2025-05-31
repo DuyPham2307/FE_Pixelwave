@@ -1,9 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
-import { User } from "@/models/AuthModel";
 import '@/styles/components/_userCard.scss'
 
 const UserCardPost = () => {
-  const { user }: { user: User } = useAuth();
+  const { user } = useAuth();
   const { fullName, avatar } = user;
   return (
     <div className="userCardPost">

@@ -4,7 +4,6 @@ import { PostDetail } from "@/models/PostModel";
 import { getFeed } from "@/services/postService";
 import PostCard from "@/components/Post/PostCard";
 import { useNavigate } from "react-router-dom";
-// import { UserDTO } from "@/models/UserModel";
 import { getListFriends } from "@/services/friendService";
 import { useAuth } from "@/hooks/useAuth";
 

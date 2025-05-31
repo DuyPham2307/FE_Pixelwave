@@ -48,3 +48,10 @@ export interface AddFriendRequestDTO{
   sender: UserResponse;
   createAt: string;
 }
+
+export interface UpdateUserProfileRequestDTO{
+  phoneNumber: string;
+  age: number;
+  gender: "Male" | "Female" | "";
+  bio: string;
+}

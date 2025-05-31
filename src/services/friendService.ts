@@ -32,12 +32,10 @@ export const addFriend = async (userId: number) => {
 		return res.data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
-			console.error("getRecommend User in axios:", error);
-			throw new Error(
-				"Request failed: " + (error.response?.data?.message || "Unknown error")
-			);
+			console.error("addFriend error:", error);
+			throw error;
 		} else {
-			console.error("getRecommend User failed:", error);
+			console.error("Unexpected error in addFriend:", error);
 			throw new Error("Unexpected error occurred.");
 		}
 	}
@@ -202,6 +200,23 @@ export const getFollowers = async (userId: number) : Promise<UserDTO[]> => {
 			);
 		} else {
 			console.error("getFollowers unknown error:", error);
+			throw new Error("Unexpected error occurred.");
+		}
+	}
+}
+
+export const unFriend = async (userId: number) : Promise<UserDTO[]> => {
+	try {
+		const res = await api.delete(`/api/user/friends/${userId}`);
+		return res.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("unFriend axios error:", error);
+			throw new Error(
+				error.response?.data?.message || "Failed to unFriend."
+			);
+		} else {
+			console.error("unFriend unknown error:", error);
 			throw new Error("Unexpected error occurred.");
 		}
 	}

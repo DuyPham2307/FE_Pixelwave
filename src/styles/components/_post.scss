@@ -6,6 +6,7 @@
 	margin-bottom: 16px;
 	background-color: #fff;
 	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s ease-out;
 
 	.post-header {
 		display: flex;
@@ -45,6 +46,33 @@
 
 		.others {
 			align-self: center;
+			
+			button{
+				display: flex;
+				position: relative;
+
+				.hide-label{
+					display: none;
+					position: absolute;
+					top: 0;
+					left: 0;
+					z-index: 1000;
+					padding: 10px 20px;
+					background-color: rgb(197, 197, 197);
+				}
+
+				&:hover{
+					.hide-label{
+						display: inline-flex;
+						transform: translateX(-80%);
+						border-radius: 10px;
+
+						span{
+							width: 100px;
+						}
+					}
+				}
+			}
 		}
 	}
 

@@ -2,7 +2,11 @@ import { useAuth } from "@/hooks/useAuth";
 import React, { useEffect, useState } from "react";
 import { UserDetailResponse } from "@/models/UserModel";
 import { PostDetail, PostRequestPage, PostSimple } from "@/models/PostModel";
-import { getPostFromId, getPostFromUserId } from "@/services/postService";
+import {
+	getPostById,
+	getPostFromUserId,
+	getPostTagged,
+} from "@/services/postService";
 import "@/styles/components/_profileCard.scss";
 import {
 	Ban,
@@ -11,7 +15,6 @@ import {
 	Heart,
 	LayoutGrid,
 	Phone,
-	SquarePen,
 	Tags,
 	VenusAndMars,
 } from "lucide-react";
@@ -25,6 +28,7 @@ import {
 	unFollowUser,
 } from "@/services/friendService";
 import ListUserRelationship from "../Modal/ListUserRelationship/ListUserRelationship";
+import { unFriend } from '@/services/friendService';
 
 const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const { user } = useAuth();
@@ -32,7 +36,11 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const profileUserId = props.id;
 	const totalPost: number = props.postCount | 1;
 	const isMyWall = myId === profileUserId;
+	const [userPosts, setUserPosts] = useState<PostSimple[] | null>(null);
+	const [taggedPosts, setTaggedPosts] = useState<PostSimple[] | null>(null);
 	const [fetchPosts, setFetchPosts] = useState<PostSimple[]>([]);
+	const [isShowingTaggedPosts, setIsShowingTaggedPosts] = useState(false);
+
 	const [detailPost, setDetailPost] = useState<PostDetail | null>(null);
 	const [typeRelationShipModal, setTypeRelationShipModal] =
 		useState<string>("");
@@ -40,42 +48,89 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 		useState<boolean>(false);
 
 	useEffect(() => {
-		const fetchUserPost = async () => {
-			try {
-				const payload: PostRequestPage = {
-					userId: profileUserId,
-					size: totalPost,
-				};
-				const response = await getPostFromUserId(payload);
-				console.log("GetPost on Card success", response);
-				setFetchPosts(response.posts);
-			} catch (error) {
-				console.error("getPost error: ", error);
-				toast.error("Can't fetch post from userId");
+		const loadPosts = async () => {
+			if (!isShowingTaggedPosts) {
+				if (!userPosts) {
+					try {
+						const payload: PostRequestPage = {
+							userId: profileUserId,
+							size: totalPost,
+						};
+						const response = await getPostFromUserId(payload);
+						setUserPosts(response.posts);
+						setFetchPosts(response.posts);
+					} catch (error) {
+						console.error("getPost error: ", error);
+						toast.error("Can't fetch post from userId");
+					}
+				} else {
+					setFetchPosts(userPosts);
+				}
+			} else {
+				if (!taggedPosts) {
+					try {
+						const payload: PostRequestPage = {
+							userId: profileUserId,
+							size: totalPost,
+						};
+						const response = await getPostTagged(payload);
+						setTaggedPosts(response.posts);
+						setFetchPosts(response.posts);
+					} catch (error) {
+						console.error("get tagged post error: ", error);
+						toast.error("Can't fetch tagged posts");
+					}
+				} else {
+					setFetchPosts(taggedPosts);
+				}
 			}
 		};
-		fetchUserPost();
-	}, [profileUserId, totalPost]);
+
+		loadPosts();
+	}, [profileUserId, totalPost, isShowingTaggedPosts]);
 
 	const handleShowPost = async (postId: number) => {
 		try {
-			const res = await getPostFromId(postId);
+			const res = await getPostById(postId);
 			setDetailPost(res);
+			window.history.pushState({}, "", `/user/p/${postId}`);
 		} catch (error) {
 			console.error("Showpost error: ", error);
 			toast.error("Can't Showpost from post Id");
 		}
 	};
 
-	const requestAddFriend = async (userId: number) => {
-		try {
-			await addFriend(userId);
-			toast.success("Send add friend request success!");
-		} catch (error) {
-			console.log(error);
-			toast.error("Send add friend request fail!");
+const requestAddFriend = async (userId: number) => {
+	try {
+		await addFriend(userId);
+		toast.success("Gửi lời mời kết bạn thành công!");
+	} catch (error: any) {
+		if (error.response?.status === 409) {
+			toast.error("Bạn đã gửi lời mời kết bạn trước đó.");
+		} else {
+			console.error(error);
+			toast.error("Gửi lời mời kết bạn thất bại!");
 		}
-	};
+	}
+};
+
+const handleUnFriend = async (userId: number) => {
+	try {
+		const res = await unFriend(userId);
+		console.log(res);
+		
+
+		toast.success("Xóa kết bạn thành công!");
+	} catch (error: any) {
+		if (error.response?.status === 409) {
+			toast.error("Bạn đã gửi lời mời kết bạn trước đó.");
+		} else {
+			console.error(error);
+			toast.error("Gửi lời mời kết bạn thất bại!");
+		}
+	}
+};
+
 
 	const requestFollow = async (userId: number) => {
 		try {
@@ -132,7 +187,13 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 				/>
 			)}
 			{detailPost ? (
-				<PostDetails post={detailPost} onClose={() => setDetailPost(null)} />
+				<PostDetails
+					post={detailPost}
+					onClose={() => {
+						setDetailPost(null);
+						window.history.pushState({}, "", `/user/${user?.id}`);
+					}}
+				/>
 			) : (
 				""
 			)}
@@ -161,7 +222,7 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 								{props.isFriend ? (
 									<button
 										className="addFriend"
-										onClick={() => requestAddFriend(props.id)}
+										onClick={() => handleUnFriend(props.id)}
 									>
 										Friend
 									</button>
@@ -216,18 +277,20 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 			</div>
 			<div className="profile-wall">
 				<div className="wall-actions">
-					<button className="personal">
+					<button
+						className={`personal ${!isShowingTaggedPosts ? "active" : ""}`}
+						onClick={() => setIsShowingTaggedPosts(false)}
+					>
 						<LayoutGrid />
 					</button>
-					<button className="tagging">
+					<button
+						className={`tagging ${isShowingTaggedPosts ? "active" : ""}`}
+						onClick={() => setIsShowingTaggedPosts(true)}
+					>
 						<Tags />
 					</button>
-					{isMyWall ? (
-						<button className="edit">
-							<SquarePen />
-						</button>
-					) : undefined}
 				</div>
+
 				<div className="wall-posts">
 					{fetchPosts.map((post) => {
 						return (

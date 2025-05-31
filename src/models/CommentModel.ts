@@ -14,4 +14,5 @@ export interface CommentRequestDTO {
   content: string;
   postId: number;
   parentCommentId?: number | null; // optional, dùng cho reply
+  images: File[] | null;
 };

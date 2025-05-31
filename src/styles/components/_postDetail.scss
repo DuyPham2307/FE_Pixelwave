@@ -71,6 +71,25 @@
 							.user-name {
 								font-weight: bold;
 							}
+
+							.delete-post {
+								display: flex;
+								position: relative;
+
+								button {
+									display: none;
+									position: absolute;
+									top: 0;
+									left: 0;
+									background-color: #ffffff;
+								}
+
+								&:hover {
+									button {
+										display: block;
+									}
+								}
+							}
 						}
 
 						.timestamp {
@@ -124,9 +143,11 @@
 				.post-actions {
 					display: flex;
 					gap: 32px;
-					margin-bottom: 16px;
+					padding-bottom: 8px;
+					margin-bottom: 8px;
 					align-items: center;
 					justify-content: space-between;
+					border-bottom: 1px solid rgb(239, 239, 239);
 
 					button {
 						display: flex;

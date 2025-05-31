@@ -1,0 +1,32 @@
+.dashboard {
+  background-color: white;
+  border-radius: 20px;
+  padding: 2rem;
+  height: 85vh;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  margin-right: 1rem;
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  p {
+    margin-bottom: 2rem;
+    text-align: center;
+    font-style: italic;
+  }
+
+  .chart-section {
+    margin-bottom: 3rem;
+
+    h2{
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+  }
+}

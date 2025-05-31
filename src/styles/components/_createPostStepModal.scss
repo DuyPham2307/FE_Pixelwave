@@ -203,7 +203,7 @@
 		.step3-actions {
 			display: flex;
 			flex-direction: row;
-			justify-content: space-between;
+			gap: 32px;
 			position: relative;
 
 			.emoji-picker {
@@ -214,6 +214,10 @@
 			}
 
 			.share-btn {
+				position: absolute;
+				right: 0;
+				top: 50%;
+				transform: translateY(-50%);
 				padding: 10px 20px;
 				background-color: #0093f5;
 				color: white;

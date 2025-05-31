@@ -3,6 +3,9 @@
 	flex-direction: column;
 	padding: 2rem;
 	max-width: 1200px;
+	height: 85vh;
+	overflow-y: auto;
+	scrollbar-width: none;
 	margin: 0 auto;
 	font-family: Arial, sans-serif;
 	background-color: white;
@@ -118,7 +121,7 @@
 				border-radius: 16px;
 				font-size: 1rem;
 
-				&.edit {
+				&.active {
 					background-color: #514caf;
 					color: white;
 				}

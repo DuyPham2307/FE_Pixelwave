@@ -12,7 +12,7 @@ import { PostDetail, PostSimple } from "@/models/PostModel";
 import "@/styles/pages/_collection.scss";
 import toast from "react-hot-toast";
 import { SquarePlus, Trash } from "lucide-react";
-import { getPostFromId } from "@/services/postService";
+import { getPostById } from "@/services/postService";
 import PostDetails from "@/components/Post/PostDetails";
 import CreateCollectionModal from "./../../components/Modal/CreateCollection/CreateCollectionModal";
 
@@ -23,9 +23,6 @@ const CollectionsPage = () => {
 	const [posts, setPosts] = useState<PostSimple[]>([]);
 	const [postDetails, setPostDetails] = useState<PostDetail | null>(null);
 	const [showModal, setShowModal] = useState(false);
-	// const [newCollectionName, setNewCollectionName] = useState("");
-	// const [isPublic, setIsPulic] = useState(true);
-	// const [newDescription, setNewDescription] = useState("");
 
 	useEffect(() => {
 		loadCollections();
@@ -34,13 +31,17 @@ const CollectionsPage = () => {
 	const loadCollections = async () => {
 		const data = await getUserCollections();
 		setCollections(data);
-		setSelectedCollection(data[0]);
+
+		if (data.length > 0) {
+			selectCollection(data[0]); // <- gọi đúng tên hàm và đúng thời điểm
+		}
 	};
 
 	const selectCollection = async (collection: CollectionResponseDTO) => {
 		setSelectedCollection(collection);
 		const postList = await getPostsInCollection(collection.id);
 		setPosts(postList);
+		console.log(postList);
 	};
 
 	const handleDelete = async (collectionId: number) => {
@@ -53,8 +54,9 @@ const CollectionsPage = () => {
 
 	const handleLoadDetail = async (postId: number): Promise<void> => {
 		try {
-			const res = await getPostFromId(postId);
+			const res = await getPostById(postId);
 			setPostDetails(res);
+			window.history.pushState({}, "", `/user/p/${postId}`);
 		} catch (error) {
 			toast.error("Failed to load post details");
 			console.error("Error loading post details:", error);
@@ -136,7 +138,10 @@ const CollectionsPage = () => {
 				<PostDetails
 					post={postDetails}
 					key={postDetails.id}
-					onClose={() => setPostDetails(null)}
+					onClose={() => {
+						setPostDetails(null);
+						window.history.pushState({}, "", "/user/collections");
+					}}
 				/>
 			)}
 			{showModal && (
