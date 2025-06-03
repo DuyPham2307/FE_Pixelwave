@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 import { likePost, unlikePost } from "@/services/postService";
 import toast from "react-hot-toast";
 import ListCollection from "../Modal/ListCollection/ListCollectionModal";
+import { useAuth } from "@/hooks/useAuth";
 
 type PostProps = {
 	post: PostDetail; // Sử dụng model Post
@@ -31,6 +32,8 @@ const PostCard: React.FC<PostProps> = (props) => {
 	const [isLiked, setIsLiked] = useState<boolean>(post.liked);
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 	const [isHide, setIsHide] = useState(false);
+	const { user } = useAuth();
+	const userId = user?.id;
 
 	const getPrivacyIcon = (setting: string) => {
 		switch (setting) {
@@ -116,6 +119,19 @@ const PostCard: React.FC<PostProps> = (props) => {
 										<span className="user-name">{post.postUser.fullName}</span>
 									</Link>
 									<span>{getPrivacyIcon(post.privacySetting)}</span>
+									<p>
+										{!post.taggedUser &&
+											(post.tagUserCount > -1 ? (
+												<>
+													Đã nhắc đến <Link to={`/user/${userId}`}>bạn</Link> và{" "}
+													{post.tagUserCount + 1} người khác
+												</>
+											) : (
+												<>
+													Đã nhắc đến <Link to={`/user/${userId}`}>bạn</Link>
+												</>
+											))}
+									</p>
 								</div>
 								<span className="timestamp">
 									{formatTimestamp(post.createdAt)}
@@ -132,8 +148,9 @@ const PostCard: React.FC<PostProps> = (props) => {
 						</div>
 
 						<p className="post-description">{post.caption}</p>
-
-						<CarouselImage img_urls={post.images} />
+						<div className="carousel-wrapper">
+							<CarouselImage img_urls={post.images} />
+						</div>
 
 						<div className="post-actions">
 							<button className="like-btn" onClick={handleReact}>

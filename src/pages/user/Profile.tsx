@@ -9,7 +9,7 @@ import NotFoundPage from "../NotFoundPage";
 const Profile = () => {
 	const { id: profileUserId } = useParams(); // ID trên URL
 	const [profile, setProfile] = useState<UserDetailResponse>();
-		const [notFound, setNotFound] = useState(false);
+	const [notFound, setNotFound] = useState(false);
 
 	useEffect(() => {
 		if (!profileUserId || isNaN(Number(profileUserId))) {
@@ -25,16 +25,20 @@ const Profile = () => {
 			} catch (error) {
 				toast.error("Can't get profile user from id");
 				console.log("profilePage", error);
-							setNotFound(true);
-				throw error; 
+				setNotFound(true);
+				throw error;
 			}
 		};
 		fetchUserProfile();
 	}, [profileUserId]);
 
-		if (notFound) return <NotFoundPage />;
+	if (notFound) return <NotFoundPage />;
 
-	return <div>{profile && <ProfileCard {...profile} />}</div>;
+	return (
+		<div style={{ flex: 1, display: "flex" }}>
+			{profile && <ProfileCard {...profile} />}
+		</div>
+	);
 };
 
 export default Profile;

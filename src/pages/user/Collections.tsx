@@ -31,7 +31,8 @@ const CollectionsPage = () => {
 	const loadCollections = async () => {
 		const data = await getUserCollections();
 		setCollections(data);
-
+		console.log("dasdasd", data);
+		
 		if (data.length > 0) {
 			selectCollection(data[0]); // <- gọi đúng tên hàm và đúng thời điểm
 		}

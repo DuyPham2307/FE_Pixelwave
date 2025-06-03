@@ -92,7 +92,7 @@ const Explore = () => {
 			toast.error("Can't show post from post Id");
 		}
 	};
-	
+
 	if (notFound) return <NotFoundPage />;
 
 	return (
@@ -139,63 +139,83 @@ const Explore = () => {
 						</div>
 					))}
 					<div className="tag-item" onClick={() => setShowSelectTagModal(true)}>
-						More <ChevronRight />
+						{`More >`}
 					</div>
 				</div>
 			</div>
-			<div className="wall-post-wrapper">
-				{selectedTagId ? (
-					<div className="wall-posts">
-						{isLoadingImages ? (
-							<Spinner />
-						) : (
-							selectedTagImages.map((tagImage) => (
-								<div
-									className="item"
-									key={tagImage.imageId}
-									onClick={() => handleShowPost(tagImage.postId)}
-								>
-									<img src={tagImage.url} alt="Post image" />
-									<div className="counter">
-										<span>
-											{tagImage.likeCount} <Heart />
-										</span>
+			{isLoadingImages ? (
+				<Spinner />
+			) : (
+				<div className="wall-post-wrapper">
+					{selectedTagId ? (
+						<>
+							<div className="wall-posts">
+								{selectedTagImages.map((tagImage) => (
+									<div
+										className="item"
+										key={tagImage.imageId}
+										onClick={() => handleShowPost(tagImage.postId)}
+									>
+										<img src={tagImage.url} alt="Post image" />
+										<div className="counter">
+											<span>
+												{tagImage.likeCount} <Heart />
+											</span>
+										</div>
 									</div>
-								</div>
-							))
-						)}
-					</div>
-				) : (
-					<div className="blank-space">
-						<h1>Select 1 tags to explore about them!</h1>
-					</div>
-				)}
-			</div>
-			<div className="pagination-posts">
-				<button
-					className="prev-btn"
-					onClick={() => {
-						if (currentPage > 1 && selectedTagId) {
-							fetchImagesByTag(selectedTagId, currentPage - 1);
-						}
-					}}
-					disabled={currentPage === 1}
-				>
-					<ChevronLeft />
-				</button>
-				<span>{currentPage}</span>
-				<button
-					className="next-btn"
-					onClick={() => {
-						if (!isLastPage && selectedTagId) {
-							fetchImagesByTag(selectedTagId, currentPage + 1);
-						}
-					}}
-					disabled={isLastPage}
-				>
-					<ChevronRight />
-				</button>
-			</div>
+								))}
+								{isLoadingImages ? (
+									<Spinner />
+								) : (
+									selectedTagImages.map((tagImage) => (
+										<div
+											className="item"
+											key={tagImage.imageId}
+											onClick={() => handleShowPost(tagImage.postId)}
+										>
+											<img src={tagImage.url} alt="Post image" />
+											<div className="counter">
+												<span>
+													{tagImage.likeCount} <Heart />
+												</span>
+											</div>
+										</div>
+									))
+								)}
+							</div>
+							<div className="pagination-posts">
+								<button
+									className="prev-btn"
+									onClick={() => {
+										if (currentPage > 1 && selectedTagId) {
+											fetchImagesByTag(selectedTagId, currentPage - 1);
+										}
+									}}
+									disabled={currentPage === 1}
+								>
+									<ChevronLeft />
+								</button>
+								<span>{currentPage}</span>
+								<button
+									className="next-btn"
+									onClick={() => {
+										if (!isLastPage && selectedTagId) {
+											fetchImagesByTag(selectedTagId, currentPage + 1);
+										}
+									}}
+									disabled={isLastPage}
+								>
+									<ChevronRight />
+								</button>
+							</div>
+						</>
+					) : (
+						<div className="blank-space">
+							<h1>Select 1 tags to explore about them!</h1>
+						</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 };

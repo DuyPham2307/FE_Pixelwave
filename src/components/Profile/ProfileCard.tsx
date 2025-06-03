@@ -57,6 +57,7 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 							size: totalPost,
 						};
 						const response = await getPostFromUserId(payload);
+						console.log(response.posts);
 						setUserPosts(response.posts);
 						setFetchPosts(response.posts);
 					} catch (error) {
@@ -234,7 +235,7 @@ const handleUnFriend = async (userId: number) => {
 										+ Add friend
 									</button>
 								)}
-								<button className="block">
+								<button className="block" onClick={() => requestBlock(props.id)}>
 									{/* check block 
 								=> hiển thị block > requestBlock(props.id)
 								=> hiển thị unblock > requestUnBlock(props.id) */}

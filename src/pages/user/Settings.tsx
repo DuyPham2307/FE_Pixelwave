@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import "@/styles/pages/_setting.scss";
 import { useAuth } from "@/hooks/useAuth";
-import { UpdateUserProfileRequestDTO } from "@/models/UserModel";
+import {
+	UpdateUserProfileRequestDTO,
+	UserDetailResponse,
+} from "@/models/UserModel";
 import {
 	getUserById,
 	updateAvatar,
@@ -12,6 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AvatarCropModal from "@/components/Modal/AvatarCropModal/AvatarCropModal";
+import { getBlockedUsers, unblockUser } from "@/services/friendService";
 
 const Settings = () => {
 	const { user } = useAuth();
@@ -21,6 +25,9 @@ const Settings = () => {
 	const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 	const [showPersonalInfo, setShowPersonalInfo] = useState(false);
 	const [showAccountInfo, setShowAccountInfo] = useState(false);
+	const [showBlockInfo, setShowBlockInfo] = useState(false);
+	const [listBlock, setListBlock] = useState<UserDetailResponse[] | null>(null);
+	const [hasFetchedBlockedUsers, setHasFetchedBlockedUsers] = useState(false);
 	const [userData, setUserData] = useState<UpdateUserProfileRequestDTO | null>(
 		null
 	);
@@ -150,6 +157,27 @@ const Settings = () => {
 		} catch (error) {
 			console.error("Lỗi khi cập nhật mật khẩu:", error);
 			toast.error("Cập nhật mật khẩu thất bại: ", error);
+		}
+	};
+
+	const getListBlocked = async (): Promise<void> => {
+		try {
+			const res = await getBlockedUsers();
+			setListBlock(res);
+		} catch (error) {
+			console.error("Lỗi khi lấy danh sách người dùng đã block:", error);
+			toast.error("Lấy danh sách người dùng đã block thất bại: ", error);
+		}
+	};
+
+	const handleUnblock = async (userId: number): Promise<void> => {
+		try {
+			await unblockUser(userId);
+			toast.success("Hủy chặn người dùng thành công");
+			getListBlocked(); // cập nhật lại danh sách
+		} catch (error) {
+			console.error("Lỗi khi unblock người dùng:", error);
+			toast.error("Unblock thất bại");
 		}
 	};
 
@@ -297,6 +325,54 @@ const Settings = () => {
 						>
 							Lưu thay đổi
 						</button>
+					</div>
+				)}
+			</div>
+
+			{/* BLOCK INFO */}
+			<div className="setting-section">
+				<div
+					className="setting-header"
+					onClick={() => {
+						setShowBlockInfo((prev) => {
+							const willOpen = !prev;
+							if (willOpen && !hasFetchedBlockedUsers) {
+								getListBlocked();
+								setHasFetchedBlockedUsers(true);
+							}
+							return willOpen;
+						});
+					}}
+				>
+					<span>Người dùng đã bị chặn</span>
+					{showBlockInfo ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+				</div>
+				{showBlockInfo && (
+					<div className="setting-content">
+						{listBlock && listBlock.length > 0 ? (
+							listBlock.map((blockedUser) => (
+								<div key={blockedUser.id} className="blocked-user-card">
+									<div className="user-info">
+										<img
+											src={blockedUser.avatar || "/default-avatar.png"}
+											alt={blockedUser.fullName}
+											className="avatar"
+										/>
+										<div>
+											<p className="name"><a href={`/user/${blockedUser.id}`}>{blockedUser.fullName}</a></p>
+										</div>
+									</div>
+									<button
+										className="unblock-btn"
+										onClick={() => handleUnblock(blockedUser.id)}
+									>
+										Hủy chặn
+									</button>
+								</div>
+							))
+						) : (
+							<p>Bạn chưa chặn người dùng nào.</p>
+						)}
 					</div>
 				)}
 			</div>

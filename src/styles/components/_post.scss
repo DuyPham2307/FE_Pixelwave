@@ -1,5 +1,4 @@
 .post {
-	width: fit-content;
 	border: 1px solid #ddd;
 	border-radius: 8px;
 	padding: 16px;
@@ -7,6 +6,11 @@
 	background-color: #fff;
 	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
 	transition: all 0.3s ease-out;
+	height: 85vh;
+	width: 100%;
+	max-width: 540px;
+	display: flex;
+	flex-direction: column;
 
 	.post-header {
 		display: flex;
@@ -25,17 +29,29 @@
 			display: flex;
 			flex-direction: column;
 
-			div{
+			div {
 				display: flex;
 				flex-direction: row;
-				gap: 30px;
+				align-items: center;
+				gap: 10px;
 
 				.user-name {
 					font-weight: bold;
+					display: block;
+					max-width: 200px;
+					overflow-x: hidden;
+					text-overflow: ellipsis;
 				}
 
-				span svg{
+				span svg {
 					width: 16px;
+				}
+
+				p {
+					font-size: 0.75rem;
+					text-align: center;
+					font-weight: bold;
+					font-style: italic;
 				}
 			}
 
@@ -45,13 +61,13 @@
 		}
 
 		.others {
-			align-self: center;
-			
-			button{
+			align-self: flex-start;
+
+			button {
 				display: flex;
 				position: relative;
 
-				.hide-label{
+				.hide-label {
 					display: none;
 					position: absolute;
 					top: 0;
@@ -61,13 +77,13 @@
 					background-color: rgb(197, 197, 197);
 				}
 
-				&:hover{
-					.hide-label{
+				&:hover {
+					.hide-label {
 						display: inline-flex;
 						transform: translateX(-80%);
 						border-radius: 10px;
 
-						span{
+						span {
 							width: 100px;
 						}
 					}
@@ -76,18 +92,20 @@
 		}
 	}
 
+	.carousel-wrapper{
+		display: flex;
+		height: 63vh;
+	}
+
 	.post-description {
-		margin-bottom: 16px;
+		margin-bottom: 8px;
 		font-size: 14px;
 		color: #333;
 	}
 
-
-
 	.post-actions {
 		display: flex;
 		gap: 32px;
-		margin-bottom: 16px;
 		margin-top: 16px;
 		align-items: center;
 

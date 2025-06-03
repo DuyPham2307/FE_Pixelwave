@@ -45,7 +45,7 @@ export interface PostDetail {
   postUser: UserResponse;
   likeCount: number;
   commentCount: number;
-  isTaggedUser: boolean;
+  taggedUser: boolean;
   liked: boolean;
   tagUserCount: number;
   images: ImageDTO[];
