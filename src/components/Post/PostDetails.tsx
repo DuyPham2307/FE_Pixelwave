@@ -21,7 +21,7 @@ import { CommentResponseDTO } from "@/models/CommentModel";
 import ListCollection from "../Modal/ListCollection/ListCollectionModal";
 import { deletePostById, likePost, unlikePost } from "@/services/postService";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Spinner from "../Spinner/Spinner";
 
@@ -115,7 +115,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 			console.log(error);
 			toast.error("Không thể xóa bài");
 		} finally {
-			setLoading(false)
+			setLoading(false);
 		}
 	};
 
@@ -150,6 +150,21 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 												{post.postUser.fullName}
 											</span>
 											<span>{getPrivacyIcon(post.privacySetting)}</span>
+											<p>
+												{post.taggedUser &&
+													(post.tagUserCount > 1 ? (
+														<>
+															Đã nhắc đến{" "}
+															<Link to={`/user/${userId}`}>bạn</Link> và{" "}
+															{post.tagUserCount - 1} người khác
+														</>
+													) : (
+														<>
+															Đã nhắc đến{" "}
+															<Link to={`/user/${userId}`}>bạn</Link>
+														</>
+													))}
+											</p>
 											{post.postUser.id === userId && (
 												<div className="delete-post">
 													<Ellipsis />

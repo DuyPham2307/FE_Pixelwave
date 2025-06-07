@@ -1,102 +1,111 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Camera, File, Info, Mic, Phone, Smile, Video } from "lucide-react";
 import "@/styles/components/_messengerChat.scss";
 import { formatRelativeTime } from "@/utils/formatTimestamp";
+import { getMessages } from "@/services/chatService";
+import { Conversation, Message } from "@/models/Conversation";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { Link } from "react-router-dom";
 
-interface MessageProps {
-	chatUser: {
-		id: number;
-		avatar: string;
-		fullName: string;
-	};
-	content: string;
-	createdAt: string;
+interface MesssageChatProps {
+	conversation: Conversation | null;
 }
 
-const MesssageChat = () => {
-	const messageList: MessageProps[] = [
-		{
-			chatUser: {
-				id: 1,
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-				fullName: "Alice Nguyen",
-			},
-			content: "Chào bạn! Hôm nay bạn thế nào?",
-			createdAt: "2025-05-24T08:30:00Z",
-		},
-		{
-			chatUser: {
-				id: 2,
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-				fullName: "Minh Tran",
-			},
-			content: "Mình ổn, cảm ơn Alice. Còn bạn?",
-			createdAt: "2025-05-24T08:31:00Z",
-		},
-		{
-			chatUser: {
-				id: 1,
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-				fullName: "Alice Nguyen",
-			},
-			content: "Mình cũng ổn. Trưa nay có muốn đi ăn không?",
-			createdAt: "2025-05-24T08:32:10Z",
-		},
-		{
-			chatUser: {
-				id: 2,
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-				fullName: "Minh Tran",
-			},
-			content: "Có chứ! Đi đâu đây?",
-			createdAt: "2025-05-24T08:33:30Z",
-		},
-		{
-			chatUser: {
-				id: 1,
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-				fullName: "Alice Nguyen",
-			},
-			content: "Thử quán phở mới ở góc đường Trần Hưng Đạo nhé?",
-			createdAt: "2025-05-24T08:35:00Z",
-		},
-		{
-			chatUser: {
-				id: 2,
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-				fullName: "Minh Tran",
-			},
-			content: "Nghe ngon đó. 12 giờ gặp nhé!",
-			createdAt: "2025-05-24T08:36:15Z",
-		},
-	];
-
+const MesssageChat = ({ conversation }: MesssageChatProps) => {
 	const { user } = useAuth();
+	const otherUser = conversation?.user;
 
-	const [chat, setChat] = useState<MessageProps[]>(messageList);
-	const [open, setOpen] = useState(false);
+	const [chat, setChat] = useState<Message[]>([]);
+	const [page, setPage] = useState(0);
+	const [hasMore, setHasMore] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [text, setText] = useState("");
+	const [emojiOpen, setEmojiOpen] = useState(false);
 	const [img, setImg] = useState<{ file: File | null; url: string }>({
 		file: null,
 		url: "",
 	});
-
+	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const endRef = useRef<HTMLDivElement | null>(null);
+
+	const { connected, messages, sendMessage } = useWebSocket({
+		token: localStorage.getItem("accessToken")!,
+		userId: user?.id,
+		channelId: conversation?.id,
+	});
+
+	const loadMessages = useCallback(async () => {
+		if (!conversation || loading || !hasMore) return;
+		setLoading(true);
+
+		const container = scrollContainerRef.current;
+		const scrollHeightBefore = container?.scrollHeight || 0;
+
+		try {
+			const data = await getMessages(conversation.id, page);
+			if (data.content.length === 0) {
+				setHasMore(false);
+			} else {
+				setChat((prev) => [...data.content.reverse(), ...prev]);
+				setPage((prev) => prev + 1);
+			}
+		} catch (error) {
+			console.error("Failed to load messages", error);
+		} finally {
+			setLoading(false);
+			if (container) {
+				// Giữ vị trí scroll để không bị nhảy khi load thêm tin cũ
+				const scrollHeightAfter = container.scrollHeight;
+				container.scrollTop = scrollHeightAfter - scrollHeightBefore;
+			}
+		}
+	}, [conversation, page, hasMore, loading]);
+
+	// Khi đổi conversation, reset chat và scroll xuống cuối cùng
 	useEffect(() => {
-		endRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [endRef]);
+		setChat([]);
+		setPage(0);
+		setHasMore(true);
+
+		(async () => {
+			await loadMessages();
+			endRef.current?.scrollIntoView({ behavior: "auto" });
+		})();
+	}, [conversation]);
+
+	// Khi scroll container, nếu scroll lên đầu sẽ load thêm tin nhắn cũ
+	const handleScroll = () => {
+		if (!scrollContainerRef.current) return;
+		if (scrollContainerRef.current.scrollTop === 0) {
+			loadMessages();
+		}
+	};
+
+	useEffect(() => {
+		if (!messages) return;
+		const newMessages = Array.isArray(messages) ? messages : [messages];
+
+		const container = scrollContainerRef.current;
+		if (!container) return;
+
+		const isNearBottom =
+			container.scrollHeight - container.scrollTop - container.clientHeight <
+			100;
+
+		setChat((prev) => [...prev, ...newMessages]);
+
+		if (isNearBottom) {
+			setTimeout(() => {
+				endRef.current?.scrollIntoView({ behavior: "smooth" });
+			}, 100);
+		}
+	}, [messages]);
 
 	const handleEmoji = (e: { emoji: string }) => {
 		setText((prev) => prev + e.emoji);
-		setOpen(false);
+		setEmojiOpen(false);
 	};
 
 	const handleImg = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,76 +117,106 @@ const MesssageChat = () => {
 		}
 	};
 
-	const handleSend = async () => {};
+	const handleSend = () => {
+		if (!text.trim()) return;
+		sendMessage(text.trim());
+		setText("");
+	};
 
 	return (
-		<div className="message-chat">
-			<div className="top">
-				<div className="user">
-					<img src={user?.avatar} alt="" />
-					<div className="texts">
-						<span>{user?.fullName}</span>
-						<p>Lorem ipsum</p>
-					</div>
-				</div>
-				<div className="icons">
-					<Phone />
-					<Video />
-					<Info />
-				</div>
-			</div>
-			<div className="center">
-				{chat?.map((message) => (
-					<div
-						className={
-							message.chatUser.id === user?.id ? "message own" : "message"
-						}
-						key={message?.createdAt}
-					>
-						<div className="texts">
-							{/* {message?.img && <img src={message.img} alt="" />} */}
-							<p>{message.content}</p>
-							<span>{formatRelativeTime(message.createdAt)}</span>
+		<>
+			{conversation ? (
+				<div className="message-chat">
+					<div className="top">
+						<div className="user">
+							{otherUser && (
+								<>
+									<img src={otherUser.avatar} alt={otherUser.fullName} />
+									<div className="texts">
+										<span><Link to={`/user/${otherUser.id}`}>{otherUser.fullName}</Link></span>
+										{/* <p>Đang hoạt động</p> */}
+									</div>
+								</>
+							)}
+						</div>
+						<div className="icons">
+							<Phone />
+							<Video />
+							<Info />
 						</div>
 					</div>
-				))}
-				{img.url && (
-					<div className="message own">
-						<div className="texts">
-							<img src={img.url} alt="" />
+
+					<div className="center" onScroll={handleScroll} ref={scrollContainerRef}>
+						{!hasMore && <p className="last-message">Tin nhắn cũ nhất</p>}
+						{loading && <p className="loading-message">Đang tải thêm...</p>}
+						{chat.map((message) => (
+							<div
+								key={message.id}
+								className={
+									message.sender.id === user?.id ? "message own" : "message"
+								}
+							>
+								<img
+									src={message.sender.avatar}
+									alt={message.sender.fullName}
+									className="avatar"
+								/>
+								<div className="texts">
+									{message.images?.map((imgUrl, i) => (
+										<img key={i} src={imgUrl} alt="attachment" />
+									))}
+									<p>{message.content}</p>
+									<span>{formatRelativeTime(message.createdAt)}</span>
+								</div>
+							</div>
+						))}
+						{img.url && (
+							<div className="message own">
+								<div className="texts">
+									<img src={img.url} alt="preview" />
+								</div>
+							</div>
+						)}
+						<div ref={endRef}></div>
+					</div>
+
+					<div className="bottom">
+						<div className="icons">
+							<label htmlFor="file">
+								<File />
+							</label>
+							<input type="file" id="file" hidden onChange={handleImg} />
+							<Camera />
+							<Mic />
 						</div>
-					</div>
-				)}
-				<div ref={endRef}></div>
-			</div>
-			<div className="bottom">
-				<div className="icons">
-					<label htmlFor="file">
-						<File />
-					</label>
-					<input
-						type="file"
-						id="file"
-						style={{ display: "none" }}
-						onChange={handleImg}
-					/>
-					<Camera />
-					<Mic />
-				</div>
-				<input type="text" placeholder="Text somethings" />
-				<div className="emoji">
-					<button onClick={() => setOpen(!open)}>
-						<Smile />
-					</button>
-					<div className="picker">
-						<EmojiPicker open={open} onEmojiClick={handleEmoji} />
+						<input
+							type="text"
+							value={text}
+							onChange={(e) => setText(e.target.value)}
+							onKeyDown={(e) => e.key === "Enter" && handleSend()}
+							placeholder={connected ? "Type a message..." : "Connecting..."}
+							disabled={!connected}
+						/>
+						<div className="emoji">
+							<button onClick={() => setEmojiOpen(!emojiOpen)}>
+								<Smile />
+							</button>
+							{emojiOpen && (
+								<div className="picker">
+									<EmojiPicker open={emojiOpen} onEmojiClick={handleEmoji} />
+								</div>
+							)}
+						</div>
+						<button className="sendButton" onClick={handleSend}>
+							Send
+						</button>
 					</div>
 				</div>
-				<button className="sendButton" onClick={handleSend}>
-					Send
-				</button>
-			</div>
-		</div>
+			) : (
+				
+				<div className="message-chat"><img src="" alt="" /></div>
+			)}
+		</>
 	);
 };
 

@@ -120,11 +120,11 @@ const PostCard: React.FC<PostProps> = (props) => {
 									</Link>
 									<span>{getPrivacyIcon(post.privacySetting)}</span>
 									<p>
-										{!post.taggedUser &&
-											(post.tagUserCount > -1 ? (
+										{post.taggedUser &&
+											(post.tagUserCount > 1 ? (
 												<>
 													Đã nhắc đến <Link to={`/user/${userId}`}>bạn</Link> và{" "}
-													{post.tagUserCount + 1} người khác
+													{post.tagUserCount - 1} người khác
 												</>
 											) : (
 												<>

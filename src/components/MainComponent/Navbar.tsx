@@ -7,8 +7,12 @@ import logo from "@/assets/images/logo.png";
 import { Bell, Contact, Search, SquarePlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FriendRequestDropdown from "../Dropdown/FriendRequestDropdown";
+import { NotificationDTO } from "@/models/Notification";
+import { notificationService } from "@/services/notificationService";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import NotificationDropdown from "../Dropdown/NotificationDropdown";
 
 const Navbar = () => {
 	const navigate = useNavigate();
@@ -16,7 +20,49 @@ const Navbar = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [showPendingFriend, setShowPendingFriend] = useState(false);
-	// const [showNotifications, setShowNotifications] = useState<boolean>(false);
+	const [showNotiDropdown, setShowNotiDropdown] = useState(false);
+	const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
+	const [hasUnread, setHasUnread] = useState(false);
+
+	// Load unread notifications ban đầu
+	const fetchUnreadNotifications = async () => {
+		try {
+			const res = await notificationService.getNotifications(0, 20, true);
+			setNotifications(res.data.content);
+			setHasUnread(res.data.totalElements > 0);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
+	useEffect(() => {
+		if (user?.id) {
+			fetchUnreadNotifications();
+		}
+	}, [user]);
+
+	// Xử lý khi có notification mới từ WebSocket
+	const handleNotificationReceived = (newNoti: NotificationDTO) => {
+		setNotifications((prev) => [newNoti, ...prev]);
+		setHasUnread(true);
+	};
+
+	useWebSocket({
+		token: localStorage.getItem("accessToken")!,
+		userId: user?.id,
+		onNotificationReceived: handleNotificationReceived,
+	});
+
+	const handleMarkAllAsRead = async () => {
+		try {
+			await notificationService.markAllAsRead();
+			setHasUnread(false);
+			setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+		} catch (err) {
+			console.error(err);
+			toast.error("Đánh dấu đã đọc thất bại");
+		}
+	};
 
 	const handleLogout = () => {
 		setLoading(true);
@@ -60,10 +106,21 @@ const Navbar = () => {
 							<SquarePlus />
 						</button>
 					</div>
-					<div className="notifications">
-						<button className="notification-btn">
+					<div className="notifications" style={{ position: "relative" }}>
+						<button
+							className="notification-btn"
+							onClick={() => setShowNotiDropdown((prev) => !prev)}
+						>
 							<Bell />
+							{hasUnread && <span className="noti-dot" />}
 						</button>
+
+						{showNotiDropdown && (
+							<NotificationDropdown
+								notifications={notifications}
+								onMarkAllAsRead={handleMarkAllAsRead}
+							/>
+						)}
 					</div>
 					<div className="profile">
 						<img src={user?.avatar} alt="logo for user" />

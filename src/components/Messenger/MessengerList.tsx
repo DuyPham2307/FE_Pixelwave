@@ -1,111 +1,28 @@
-import { useAuth } from "@/hooks/useAuth";
 import React, { useState } from "react";
 import "@/styles/components/_messengerList.scss";
 import { Search } from "lucide-react";
+import { Conversation } from "@/models/Conversation";
+import { formatRelativeTime } from "@/utils/formatTimestamp";
 
-interface User {
-	id: number;
-	avatar: string;
-	fullName: string;
-}
-interface ChatProps {
-	sender: User;
-	content: string;
-	createAt: string;
-	updateAt: string;
+interface MessengerListProps {
+  conversations: Conversation[];
+  onSelectConversation: (conv: Conversation) => void;
+  selectedConversationId: string;
 }
 
-const MessengerList: React.FC = () => {
-	const sampleData: ChatProps[] = [
-		{
-			sender: {
-				id: 1,
-				fullName: "Test",
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-			},
-			createAt: "2025-05-20T10:12:34Z",
-			updateAt: "2025-05-20T10:12:34Z",
-			content: "Hello! How are you?",
-		},
-		{
-			sender: {
-				id: 1,
-				fullName: "Test",
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-			},
-			createAt: "2025-05-20T10:12:34Z",
-			updateAt: "2025-05-20T10:12:34Z",
-			content: "Hello! How are you?",
-		},
-		{
-			sender: {
-				id: 1,
-				fullName: "Test",
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-			},
-			createAt: "2025-05-20T10:12:34Z",
-			updateAt: "2025-05-20T10:12:34Z",
-			content: "Hello! How are you?",
-		},
-		{
-			sender: {
-				id: 1,
-				fullName: "Test",
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-			},
-			createAt: "2025-05-20T10:12:34Z",
-			updateAt: "2025-05-20T10:12:34Z",
-			content: "Hello! How are you?",
-		},
-		{
-			sender: {
-				id: 1,
-				fullName: "Test",
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-			},
-			createAt: "2025-05-20T10:12:34Z",
-			updateAt: "2025-05-20T10:12:34Z",
-			content: "Hello! How are you?",
-		},
-		{
-			sender: {
-				id: 1,
-				fullName: "Test",
-				avatar:
-					"https://cdn.pixabay.com/photo/2018/11/13/22/01/avatar-3814081_1280.png",
-			},
-			createAt: "2025-05-20T10:12:34Z",
-			updateAt: "2025-05-20T10:12:34Z",
-			content: "Hello! How are you?",
-		},
-	];
+const MessengerList: React.FC<MessengerListProps> = ({
+	conversations,
+	onSelectConversation,
+	selectedConversationId,
+}) => {
+	const [searchUserName, setSearchUserName] = useState<string>("");
 
-	const { user } = useAuth();
-
-	const [chats, setChats] = useState<ChatProps[]>(sampleData);
-	const [input, setInput] = useState("");
-	const [selectedChat, setSelectedChat] = useState<number | null>(null);
-
-	// const filteredChats = chats.filter((chat) => chat.sender.fullName === input);
-
-	const handleSelect = (userId: number) => {
-		setSelectedChat(userId);
-		console.log(selectedChat);
-	};
+	const filteredChats = conversations.filter((chat) =>
+		chat.user.fullName.match(searchUserName)
+	);
 
 	return (
 		<div className="message-list">
-			{/* <div className="userInfo">
-				<div className="user">
-					<img src={user?.avatar || ""} alt="" />
-					<h2>{user?.fullName}</h2>
-				</div>
-			</div> */}
 			<div className="chatList">
 				<div className="search">
 					<div className="searchBar">
@@ -113,24 +30,35 @@ const MessengerList: React.FC = () => {
 						<input
 							type="text"
 							placeholder="Search"
-							onChange={(e) => setInput(e.target.value)}
+							onChange={(e) => setSearchUserName(e.target.value)}
 						/>
 					</div>
 				</div>
 
-				{chats.map((chat) => (
+				{conversations.length > 0 ? (
+					filteredChats.map((chat) => (
+						<div
+							className={`item ${chat.id === selectedConversationId ? "active" : ""}`}
+							key={chat.id}
+							onClick={() => onSelectConversation(chat)}
+						>
+							<img src={chat.user.avatar} alt="" />
+							<div className="texts">
+								<span>{chat.user.fullName}</span>
+								<p>{formatRelativeTime(chat.lastUpdated ?? "")}</p>
+							</div>
+						</div>
+					))
+				) : (
 					<div
 						className="item"
 						// key={chat.sender.id}
-						onClick={() => handleSelect(chat.sender.id)}
 					>
-						<img src={chat.sender.avatar} alt="" />
 						<div className="texts">
-							<span>{chat.sender.fullName}</span>
-							<p>{chat.content}</p>
+							<span>Chưa có bạn bè hay cuộc trò chuyện nào</span>
 						</div>
 					</div>
-				))}
+				)}
 			</div>
 		</div>
 	);
