@@ -62,37 +62,47 @@
 
 		.others {
 			align-self: flex-start;
+			position: relative;
 
 			button {
 				display: flex;
-				position: relative;
+			}
 
-				.hide-label {
-					display: none;
-					position: absolute;
-					top: 0;
-					left: 0;
-					z-index: 1000;
-					padding: 10px 20px;
-					background-color: rgb(197, 197, 197);
-				}
+			.hide-label {
+				display: flex;
+				flex-direction: column;
+				width: 200px;
+				padding: 4px;
+				position: absolute;
+				top: 20px;
+				left: 0;
+				z-index: 1000;
+				background: white;
+				box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+				transition: all 0.3s ease-out;
+				transform: translateX(-80%);
+				border-radius: 10px;
 
-				&:hover {
-					.hide-label {
-						display: inline-flex;
-						transform: translateX(-80%);
-						border-radius: 10px;
+				> li {
+					display: inline-flex;
+					gap: 10px;
+					cursor: pointer;
+					padding: 10px;
+					border-radius: 10px;
 
-						span {
-							width: 100px;
-						}
+					&:hover{
+						background-color: rgba(51, 51, 51,0.6);
+					}
+
+					span {
+						flex: 1;
 					}
 				}
 			}
 		}
 	}
 
-	.carousel-wrapper{
+	.carousel-wrapper {
 		display: flex;
 		height: 63vh;
 	}

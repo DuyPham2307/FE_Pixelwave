@@ -17,6 +17,8 @@
 	overflow-y: scroll;
 	scrollbar-width: none;
 	scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
 
     .search-input {
       width: 100%;
@@ -108,6 +110,10 @@
           box-shadow: 0 0 6px rgba(255, 102, 0, 0.8);
         }
       }
+    }
+
+    .pagination{
+      align-self: center;
     }
   }
 

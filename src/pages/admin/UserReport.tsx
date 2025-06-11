@@ -8,6 +8,7 @@ import {
 } from "@/services/reportService";
 import { Report } from "@/models/ReportModel";
 import Spinner from "@/components/Spinner/Spinner";
+import { Link } from "react-router-dom";
 
 const UserReport = () => {
 	const [reports, setReports] = useState<Report[]>([]);
@@ -40,7 +41,7 @@ const UserReport = () => {
 					status: "PENDING",
 					page,
 					size,
-				});
+				});				
 
 				setReports(data.content);
 				setTotalPages(data.totalPages);
@@ -116,10 +117,10 @@ const UserReport = () => {
 							onClick={() => setPage((prev) => prev - 1)}
 						>
 							Trước
-						</button>
+						</button> {" "}
 						<span>
 							{page + 1} / {totalPages}
-						</span>
+						</span> {" "}
 						<button disabled={last} onClick={() => setPage((prev) => prev + 1)}>
 							Tiếp
 						</button>
@@ -176,7 +177,7 @@ const UserReport = () => {
 			<div className="user-detail">
 				{selectedReport ? (
 					<>
-						<h2>Chi tiết báo cáo bài viết #{selectedReport.postId}</h2>
+						<h2>Chi tiết báo cáo bài viết <Link to={`/user/p/${selectedReport.postId}`}>#{selectedReport.postId}</Link></h2>
 						<div className="report-card">
 							<div className="report-header">
 								<img src={selectedReport.reporter.avatar} alt="Avatar" />

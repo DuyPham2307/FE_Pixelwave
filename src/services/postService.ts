@@ -6,6 +6,7 @@ import {
 	PostDetail,
 	PostSimplePage,
 } from "@/models/PostModel";
+import { UserDTO } from "@/models/UserModel";
 
 export const uploadPost = async (payload: UploadPost): Promise<void> => {
 	const formData = new FormData();
@@ -41,37 +42,42 @@ export const uploadPost = async (payload: UploadPost): Promise<void> => {
 	}
 };
 
-export const getPostById = async (postId: number): Promise<PostDetail> => {
+export const getPostById = async (
+	postId: number,
+	useAuth: boolean = false
+): Promise<PostDetail> => {
 	try {
-		const response = await axios.get<PostDetail>(
-			`${import.meta.env.VITE_API_URL}/api/post/${postId}`
+		const client = useAuth ? api : axios;
+		const baseUrl = useAuth ? "" : import.meta.env.VITE_API_URL;
+
+		const response = await client.get<PostDetail>(
+			`${baseUrl}/api/post/${postId}`
 		);
+
 		return response.data;
-	}  catch (error) {
+	} catch (error) {
 		if (axios.isAxiosError(error)) {
-			console.error("getPostFromId failed in axios:", error);
+			console.error("getPostById failed in axios:", error);
 			throw new Error(
-				"Request failed: " + error.response?.data?.message || "Unknown error"
+				"Request failed: " + (error.response?.data?.message || "Unknown error")
 			);
 		} else {
-			console.error("getPostFromId failed:", error);
-			throw new Error("Unexpected error occurred.");
+			console.error("getPostById failed:", error);
+			throw error;
 		}
 	}
-	// try {
-	// 	const response = await api.get<PostDetail>(`/api/post/${postId}`);
-	// 	return response.data;
-	// } catch (error) {
-	// 	if (axios.isAxiosError(error)) {
-	// 		console.error("getPostFromId failed in axios:", error);
-	// 		throw new Error(
-	// 			"Request failed: " + error.response?.data?.message || "Unknown error"
-	// 		);
-	// 	} else {
-	// 		console.error("getPostFromId failed:", error);
-	// 		throw new Error("Unexpected error occurred.");
-	// 	}
-	// }
+};
+
+export const getTaggedUserOfPost = async (
+	postId: number
+): Promise<UserDTO[]> => {
+	try {
+		const res = await api.get(`/api/post/${postId}/tagged-users`);
+		return res.data;
+	} catch (error) {
+		console.error("getTaggedUserOfPost failed:", error);
+		throw error;
+	}
 };
 
 export const getPostFromUserId = async (

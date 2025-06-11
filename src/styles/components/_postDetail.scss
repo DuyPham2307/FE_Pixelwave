@@ -17,6 +17,46 @@
 		width: 70%;
 		height: 70%;
 		box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.3);
+		position: relative;
+
+		> .list {
+			position: absolute;
+			z-index: 9999;
+			top: 50px;
+			right: 50%;
+			transform: translateX(220%);
+			background-color: rgb(255, 255, 255);
+			box-shadow: 0px 0px 6px 1px rgba(0, 0, 0, 0.2);
+			display: flex;
+			flex-direction: column;
+
+
+			> .item {
+				display: inline-flex;
+				align-items: center;
+							gap: 10px;
+				padding: 10px 20px;
+				border-bottom: 1px solid #ccc;
+				cursor: pointer;
+
+				&:hover{
+					background-color: #bcbcbc;
+					color: #fff;
+				}
+
+				img {
+					width: 40px;
+					height: 40px;
+					border-radius: 50%;
+					object-fit: cover;
+				}
+
+				a {
+					text-decoration: none;
+					font-size: 0.875rem;
+				}
+			}
+		}
 
 		.post-body {
 			display: flex;
@@ -69,10 +109,22 @@
 
 						div {
 							display: inline-flex;
-							gap: 32px;
+							gap: 10px;
 
 							.user-name {
 								font-weight: bold;
+							}
+
+							.user-tagged {
+								flex: 1;
+								display: flex;
+								white-space: nowrap;
+								overflow: hidden;
+								text-overflow: ellipsis;
+								max-width: 70%;
+								font-size: 0.75rem;
+								align-items: center;
+								position: relative;
 							}
 
 							.delete-post {
@@ -162,7 +214,7 @@
 						}
 					}
 
-					.like-btn{
+					.like-btn {
 						width: 100%;
 					}
 				}

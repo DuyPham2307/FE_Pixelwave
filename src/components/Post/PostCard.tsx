@@ -9,6 +9,7 @@ import {
 	Heart,
 	Bookmark,
 	EyeClosed,
+	TriangleAlert,
 } from "lucide-react";
 import { PostDetail } from "@/models/PostModel";
 import CarouselImage from "./CarouselImage";
@@ -19,6 +20,7 @@ import { likePost, unlikePost } from "@/services/postService";
 import toast from "react-hot-toast";
 import ListCollection from "../Modal/ListCollection/ListCollectionModal";
 import { useAuth } from "@/hooks/useAuth";
+import { ReportModal } from "../Modal/ReportModal/ReportModal";
 
 type PostProps = {
 	post: PostDetail; // Sử dụng model Post
@@ -32,6 +34,8 @@ const PostCard: React.FC<PostProps> = (props) => {
 	const [isLiked, setIsLiked] = useState<boolean>(post.liked);
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 	const [isHide, setIsHide] = useState(false);
+	const [showModalReport, setShowModalReport] = useState(false);
+	const [toggleActions, setToggleActions] = useState(false);
 	const { user } = useAuth();
 	const userId = user?.id;
 
@@ -98,6 +102,11 @@ const PostCard: React.FC<PostProps> = (props) => {
 						postId={post.id}
 					/>
 				)}
+				<ReportModal
+					postId={post.id}
+					open={showModalReport}
+					onClose={() => setShowModalReport(false)}
+				/>
 				{showDetail ? (
 					<PostDetails
 						post={post}
@@ -119,7 +128,7 @@ const PostCard: React.FC<PostProps> = (props) => {
 										<span className="user-name">{post.postUser.fullName}</span>
 									</Link>
 									<span>{getPrivacyIcon(post.privacySetting)}</span>
-									<p>
+									<p className="user-tagged">
 										{post.taggedUser &&
 											(post.tagUserCount > 1 ? (
 												<>
@@ -138,12 +147,28 @@ const PostCard: React.FC<PostProps> = (props) => {
 								</span>
 							</div>
 							<div className="others">
-								<button className="more-btn" onClick={() => setIsHide(true)}>
+								<button
+									className="more-btn"
+									onClick={() => setToggleActions((prev) => !prev)}
+								>
 									<Ellipsis />
-									<div className="hide-label">
-										<EyeClosed /> <span>Ẩn bài viết</span>
-									</div>
 								</button>
+								{toggleActions && (
+									<ul className="hide-label">
+										<li className="hide-item" onClick={() => setIsHide(true)}>
+											<EyeClosed /> <span>Ẩn bài viết</span>
+										</li>
+										<li
+											className="hide-item"
+											onClick={() => {
+												setShowModalReport(true);
+												setToggleActions((prev) => !prev);
+											}}
+										>
+											<TriangleAlert /> <span>Báo cáo bài viết</span>
+										</li>
+									</ul>
+								)}
 							</div>
 						</div>
 

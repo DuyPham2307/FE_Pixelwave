@@ -138,15 +138,15 @@ const AppRoutes = () => {
 							</MainLayout>
 						}
 					/>
-					<Route
-						path="/user/p/:postId"
-						element={
-							<MainLayout>
-								<PostPage />
-							</MainLayout>
-						}
-					/>
 				</Route>
+				<Route
+					path="/user/p/:postId"
+					element={
+						<MainLayout>
+							<PostPage />
+						</MainLayout>
+					}
+				/>
 
 				{/* Các route khác cho admin hoặc chưa xác thực */}
 				{/* Các route admin có thể ở đây khi có role 'ADMIN' */}

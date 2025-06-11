@@ -14,6 +14,7 @@ export interface UserDetailResponse {
   friendCount: number;
   isFollowing: boolean | null;
   isFriend: boolean | null;
+  isBlocked: boolean | null;
 }
 
 export interface UserDetail {

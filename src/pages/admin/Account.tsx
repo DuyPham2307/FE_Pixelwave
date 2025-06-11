@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import "@/styles/pages/_account.scss";
 import { ArrowLeftFromLine, CircleSlash, Search } from "lucide-react";
 import { ReportDetail, UserViolationSummary } from "@/models/ReportModel";
-import { fetchReportedUsers, fetchUserReports } from "@/services/reportService";
+import {
+	banUserViolance,
+	fetchReportedUsers,
+	fetchUserReports,
+} from "@/services/reportService";
 import { formatRelativeTime } from "@/utils/formatTimestamp";
+import toast from "react-hot-toast";
 
 const Account: React.FC = () => {
 	const [users, setUsers] = useState<UserViolationSummary[]>([]);
@@ -33,6 +38,16 @@ const Account: React.FC = () => {
 	const filteredUsers = users.filter((user) =>
 		user.user.fullName.toLowerCase().includes(query.toLowerCase())
 	);
+
+	const handleBanUser = async (userId: number) => {
+		try {
+			await banUserViolance(userId);
+			toast.success("Cấm người dùng khỏi hệ thống thành công!");
+		} catch (error) {
+			toast.error("Cấm người dùng thất bại");
+			console.log(error);
+		}
+	};
 
 	return (
 		<div className="account">
@@ -85,14 +100,19 @@ const Account: React.FC = () => {
 										className="toggle-detail-btn"
 										onClick={() => setShowReportDetails((prev) => !prev)}
 									>
-										{showReportDetails
-											? <u>Ẩn chi tiết báo cáo</u>
-											: "Xem chi tiết báo cáo"}
+										{showReportDetails ? (
+											<u>Ẩn chi tiết báo cáo</u>
+										) : (
+											"Xem chi tiết báo cáo"
+										)}
 									</button>
 								</>
 							)}
 							<div className="actions">
-								<button className="ban-btn">
+								<button
+									className="ban-btn"
+									onClick={() => handleBanUser(selectedUser.user.id)}
+								>
 									<CircleSlash /> Ban
 								</button>
 							</div>

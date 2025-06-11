@@ -63,7 +63,7 @@ const Explore = () => {
 			const res = await getImagesByTag(tagId, page, 20);
 			setSelectedTagImages(res.content);
 			setCurrentPage(page);
-			setIsLastPage(res.content.length < 20); // nếu ít hơn 20 ảnh => là trang cuối
+			setIsLastPage(res.last); // nếu ít hơn 20 ảnh => là trang cuối
 			toast.success("Loaded images for tag!");
 		} catch (error) {
 			console.error("Error loading images for tag:", error);
@@ -150,7 +150,7 @@ const Explore = () => {
 					{selectedTagId ? (
 						<>
 							<div className="wall-posts">
-								{selectedTagImages.map((tagImage) => (
+								{/* {selectedTagImages.map((tagImage) => (
 									<div
 										className="item"
 										key={tagImage.imageId}
@@ -163,7 +163,7 @@ const Explore = () => {
 											</span>
 										</div>
 									</div>
-								))}
+								))} */}
 								{isLoadingImages ? (
 									<Spinner />
 								) : (

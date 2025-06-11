@@ -28,7 +28,7 @@ import {
 	unFollowUser,
 } from "@/services/friendService";
 import ListUserRelationship from "../Modal/ListUserRelationship/ListUserRelationship";
-import { unFriend } from '@/services/friendService';
+import { unFriend } from "@/services/friendService";
 
 const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const { user } = useAuth();
@@ -92,7 +92,7 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 
 	const handleShowPost = async (postId: number) => {
 		try {
-			const res = await getPostById(postId);
+			const res = await getPostById(postId, true);
 			setDetailPost(res);
 			window.history.pushState({}, "", `/user/p/${postId}`);
 		} catch (error) {
@@ -101,37 +101,35 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 		}
 	};
 
-const requestAddFriend = async (userId: number) => {
-	try {
-		await addFriend(userId);
-		toast.success("Gửi lời mời kết bạn thành công!");
-	} catch (error: any) {
-		if (error.response?.status === 409) {
-			toast.error("Bạn đã gửi lời mời kết bạn trước đó.");
-		} else {
-			console.error(error);
-			toast.error("Gửi lời mời kết bạn thất bại!");
+	const requestAddFriend = async (userId: number) => {
+		try {
+			await addFriend(userId);
+			toast.success("Gửi lời mời kết bạn thành công!");
+		} catch (error: any) {
+			if (error.response?.status === 409) {
+				toast.error("Bạn đã gửi lời mời kết bạn trước đó.");
+			} else {
+				console.error(error);
+				toast.error("Gửi lời mời kết bạn thất bại!");
+			}
 		}
-	}
-};
+	};
 
-const handleUnFriend = async (userId: number) => {
-	try {
-		const res = await unFriend(userId);
-		console.log(res);
-		
+	const handleUnFriend = async (userId: number) => {
+		try {
+			const res = await unFriend(userId);
+			console.log(res);
 
-		toast.success("Xóa kết bạn thành công!");
-	} catch (error: any) {
-		if (error.response?.status === 409) {
-			toast.error("Bạn đã gửi lời mời kết bạn trước đó.");
-		} else {
-			console.error(error);
-			toast.error("Gửi lời mời kết bạn thất bại!");
+			toast.success("Xóa kết bạn thành công!");
+		} catch (error: any) {
+			if (error.response?.status === 409) {
+				toast.error("Bạn đã gửi lời mời kết bạn trước đó.");
+			} else {
+				console.error(error);
+				toast.error("Gửi lời mời kết bạn thất bại!");
+			}
 		}
-	}
-};
-
+	};
 
 	const requestFollow = async (userId: number) => {
 		try {
@@ -156,20 +154,20 @@ const handleUnFriend = async (userId: number) => {
 	const requestBlock = async (userId: number) => {
 		try {
 			await blockUser(userId);
-			toast.success("Send unfollow request success!");
+			toast.success("Block success!");
 		} catch (error) {
 			console.log(error);
-			toast.error("Send unfollow request fail!");
+			toast.error("Block failed!");
 		}
 	};
 
 	const requestUnBlock = async (userId: number) => {
 		try {
 			await unblockUser(userId);
-			toast.success("Send unfollow request success!");
+			toast.success("Unblock success!");
 		} catch (error) {
 			console.log(error);
-			toast.error("Send unfollow request fail!");
+			toast.error("Unblock failed!");
 		}
 	};
 
@@ -235,12 +233,21 @@ const handleUnFriend = async (userId: number) => {
 										+ Add friend
 									</button>
 								)}
-								<button className="block" onClick={() => requestBlock(props.id)}>
-									{/* check block 
-								=> hiển thị block > requestBlock(props.id)
-								=> hiển thị unblock > requestUnBlock(props.id) */}
-									<Ban /> Block
-								</button>
+								{props.isBlocked ? (
+									<button
+										className="block"
+										onClick={() => requestUnBlock(props.id)}
+									>
+										<Ban /> Unblock
+									</button>
+								) : (
+									<button
+										className="block"
+										onClick={() => requestBlock(props.id)}
+									>
+										<Ban /> Block
+									</button>
+								)}
 							</div>
 						)}
 					</div>

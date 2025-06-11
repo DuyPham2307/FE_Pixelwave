@@ -56,3 +56,7 @@ export const fetchUserReports = async (
 	const res = await api.get(`/api/reports/users/${userId}/violations`);
 	return res.data;
 };
+
+export const banUserViolance = async (userId: number) => {
+	await api.post(`/api/reports/user/${userId}/ban`);
+};

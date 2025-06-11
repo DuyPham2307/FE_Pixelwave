@@ -30,6 +30,7 @@ const CommentList: React.FC<CommentListProps> = ({
 					onCommentUpdated={onCommentUpdated}
 					setParentComment={setParentComment}
 					postId={postId}
+					key={comment.id}
 				/>
 			))}
 		</div>

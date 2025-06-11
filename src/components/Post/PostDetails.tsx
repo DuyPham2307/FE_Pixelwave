@@ -20,12 +20,18 @@ import CommentList from "./../Comment/CommentList";
 import CommentForm from "./../Comment/CommentForm";
 import { CommentResponseDTO } from "@/models/CommentModel";
 import ListCollection from "../Modal/ListCollection/ListCollectionModal";
-import { deletePostById, likePost, unlikePost } from "@/services/postService";
+import {
+	deletePostById,
+	getTaggedUserOfPost,
+	likePost,
+	unlikePost,
+} from "@/services/postService";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Spinner from "../Spinner/Spinner";
 import { ReportModal } from "../Modal/ReportModal/ReportModal";
+import { UserDTO } from "@/models/UserModel";
 
 type PostDetailsProps = {
 	post: PostDetail;
@@ -41,6 +47,8 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 	const [isLiked, setIsLiked] = useState<boolean>(post.liked);
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 	const [comments, setComments] = useState<CommentResponseDTO[]>([]);
+	const [showTagged, setShowTagged] = useState(false);
+	const [taggedUsers, setTaggedUsers] = useState<UserDTO[]>([]);
 	const [showModalCollection, setShowModalCollection] = useState(false);
 	const [showModalReport, setShowModalReport] = useState(false);
 	const [commentWantReply, setCommentWantReply] =
@@ -61,16 +69,14 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 
 	useEffect(() => {
 		fetchComments();
+		if (post.tagUserCount > 0) {
+			getTaggedUserOfPost(post.id)
+				.then(setTaggedUsers)
+				.catch((err) => toast.error("Failed to fetch tagged users", err));
+		}
 	}, []);
 
 	console.log(post);
-
-	// const handleLikeClick = () => {
-	// 	const newLiked = !isLiked;
-	// 	setIsLiked(newLiked);
-	// 	onLikeChanged();
-	// 	setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-	// };
 
 	const handleReact = async (): Promise<void> => {
 		try {
@@ -122,6 +128,12 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 		}
 	};
 
+	const navigateToPage = (userId: number) => {
+		navigate(`/user/${userId}`);
+		setShowTagged(false);
+		onClose();
+	}
+
 	return (
 		<div className="post-details-modal">
 			{showModalCollection && (
@@ -139,6 +151,16 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 				<Spinner />
 			) : (
 				<div className="modal-content">
+					{showTagged && (
+						<div className="list">
+							{taggedUsers.map((user) => (
+								<div key={user.id} className="item" onClick={() => navigateToPage(user.id)}>
+									<img src={user.avatar} alt="" />
+									{user.fullName}
+								</div>
+							))}
+						</div>
+					)}
 					<div className="post-body">
 						<button className="close-btn" onClick={onClose}>
 							<X />
@@ -158,21 +180,21 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 												{post.postUser.fullName}
 											</span>
 											<span>{getPrivacyIcon(post.privacySetting)}</span>
-											<p>
+											<div className="user-tagged">
 												{post.taggedUser &&
 													(post.tagUserCount > 1 ? (
 														<>
-															Đã nhắc đến{" "}
-															<Link to={`/user/${userId}`}>bạn</Link> và{" "}
-															{post.tagUserCount - 1} người khác
+															<button
+																onClick={() => setShowTagged((prev) => !prev)}
+															>
+																Đã nhắc đến bạn và {post.tagUserCount - 1} người
+																khác
+															</button>
 														</>
 													) : (
-														<>
-															Đã nhắc đến{" "}
-															<Link to={`/user/${userId}`}>bạn</Link>
-														</>
+														<button>Đã nhắc đến bạn</button>
 													))}
-											</p>
+											</div>
 											{post.postUser.id === userId && (
 												<div className="delete-post">
 													<Ellipsis />
