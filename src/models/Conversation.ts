@@ -4,6 +4,7 @@ export interface Conversation {
   id: string;
   user: UserDTO;
   lastUpdated: string | null;
+  lastMessageContent: string;
 }
 
 export interface Message {
@@ -12,6 +13,15 @@ export interface Message {
   sender: UserDTO;
   createdAt: string;  // ISO date string, bạn có thể đổi thành Date nếu muốn parse
   images: string[];   // mảng URL ảnh (ở đây là array rỗng)
+}
+
+export interface WebSocketMessageDTO{
+  id: number;
+  content: string;
+  sender: string;
+  channelId: string; 
+  type: "CHAT" | "JOIN" | "LEAVE" | null;
+  timestamp: number;
 }
 
 export interface Sort {

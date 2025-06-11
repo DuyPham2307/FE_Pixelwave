@@ -23,6 +23,8 @@ const PostPage = () => {
 			try {
 				const data = await getPostById(postId);
 				setPostData(data);
+				console.log(data);
+				
 			} catch (error) {
 				console.error("Showpost error: ", error);
 				toast.error("Can't Showpost from post Id");

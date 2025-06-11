@@ -34,6 +34,7 @@ export interface UserDTO {
   id: number;
   fullName: string;
   avatar: string;
+  isBanned: boolean;
 }
 
 export interface UserRecommendationDTO {

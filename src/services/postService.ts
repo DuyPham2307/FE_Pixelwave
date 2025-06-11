@@ -133,7 +133,7 @@ export const likePost = async (postId: number) => {
 			throw new Error(error.response?.data?.message || "Toggle like failed");
 		} else {
 			console.error("Toggle like failed:", error);
-			throw new Error(error);
+			// throw new Error(error);
 		}
 	}
 };
@@ -147,7 +147,7 @@ export const unlikePost = async (postId: number) => {
 			throw new Error(error.response?.data?.message || "Toggle like failed");
 		} else {
 			console.error("Toggle like failed:", error);
-			throw new Error(error);
+			// throw new Error(error);
 		}
 	}
 };

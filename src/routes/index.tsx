@@ -150,6 +150,7 @@ const AppRoutes = () => {
 
 				{/* Các route khác cho admin hoặc chưa xác thực */}
 				{/* Các route admin có thể ở đây khi có role 'ADMIN' */}
+				<Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
 					<Route
 						path="/admin/"
 						element={
@@ -182,6 +183,7 @@ const AppRoutes = () => {
 							</AdminLayout>
 						}
 					/>
+				</Route>
 				<Route path="*" element={<NotFoundPage />} />
 			</Routes>
 		</Router>

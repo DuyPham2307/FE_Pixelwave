@@ -25,6 +25,8 @@ const Messenger: React.FC = () => {
 
 	useEffect(() => {
 		if (conversations) setSelectedConversation(conversations[0]);
+		console.log(conversations);
+		
 	}, [conversations]);
 
 	return (

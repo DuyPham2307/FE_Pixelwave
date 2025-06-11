@@ -57,7 +57,7 @@
 			border-radius: 8px;
 			cursor: pointer;
 			transition: transform 0.2s ease;
-      height: 80px;
+			height: 80px;
 
 			&:hover {
 				transform: scale(1.03);
@@ -95,6 +95,48 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
+
+		.report-list {
+			margin-top: 1rem;
+			width: 100%;
+			list-style: none;
+			padding: 0;
+
+			li {
+				background: #fff;
+				border: 1px solid #ddd;
+				padding: 1rem;
+				border-radius: 8px;
+				margin-bottom: 1rem;
+
+				.reporter {
+					display: flex;
+					flex-direction: row;
+					gap: 16px;
+
+					h3{
+						margin: 0;
+						width: 100%;
+						text-align: left;
+					}
+
+					img{
+						width: 40px;
+						height: 40px;
+					}
+
+					.report-label{
+						display: flex;
+						flex-direction: column;
+						justify-content: center;
+					}
+				}
+
+				p {
+					margin: 0.2rem 0;
+				}
+			}
+		}
 
 		&.expanded {
 			width: 35%;

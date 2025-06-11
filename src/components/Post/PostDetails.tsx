@@ -6,6 +6,7 @@ import {
 	Heart,
 	Lock,
 	Trash2,
+	TriangleAlert,
 	Users,
 	X,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Spinner from "../Spinner/Spinner";
+import { ReportModal } from "../Modal/ReportModal/ReportModal";
 
 type PostDetailsProps = {
 	post: PostDetail;
@@ -40,6 +42,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 	const [likeCount, setLikeCount] = useState<number>(post.likeCount);
 	const [comments, setComments] = useState<CommentResponseDTO[]>([]);
 	const [showModalCollection, setShowModalCollection] = useState(false);
+	const [showModalReport, setShowModalReport] = useState(false);
 	const [commentWantReply, setCommentWantReply] =
 		useState<CommentResponseDTO | null>(null);
 	const navigate = useNavigate();
@@ -127,6 +130,11 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 					postId={post.id}
 				/>
 			)}
+			<ReportModal
+				postId={post.id}
+				open={showModalReport}
+				onClose={() => setShowModalReport(false)}
+			/>
 			{loading ? (
 				<Spinner />
 			) : (
@@ -196,8 +204,10 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 							</div>
 
 							<div className="post-actions">
-								<button className="like-btn" onClick={handleReact}>
-									{isLiked ? <Heart fill="red" color="red" /> : <Heart />}
+								<button className="like-btn">
+									<span onClick={handleReact} className="icon-click-only">
+										{isLiked ? <Heart fill="red" color="red" /> : <Heart />}
+									</span>
 									<span>{likeCount}</span>
 								</button>
 								<button
@@ -205,6 +215,12 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 									onClick={() => setShowModalCollection(true)}
 								>
 									<Bookmark />
+								</button>
+								<button
+									className="report-btn"
+									onClick={() => setShowModalReport(true)}
+								>
+									<TriangleAlert />
 								</button>
 							</div>
 							<div className="post-send-comment">

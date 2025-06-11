@@ -1,13 +1,18 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Camera, File, Info, Mic, Phone, Smile, Video } from "lucide-react";
 import "@/styles/components/_messengerChat.scss";
 import { formatRelativeTime } from "@/utils/formatTimestamp";
 import { getMessages } from "@/services/chatService";
-import { Conversation, Message } from "@/models/Conversation";
+import {
+	Conversation,
+	Message,
+	WebSocketMessageDTO,
+} from "@/models/Conversation";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "react-router-dom";
+import { UserDTO } from "@/models/UserModel";
 
 interface MesssageChatProps {
 	conversation: Conversation | null;
@@ -16,6 +21,26 @@ interface MesssageChatProps {
 const MesssageChat = ({ conversation }: MesssageChatProps) => {
 	const { user } = useAuth();
 	const otherUser = conversation?.user;
+
+	const userInfo = useMemo(() => {
+		if (!user) return null;
+		return {
+			id: user.id,
+			fullName: user.fullName,
+			avatar: user.avatar ?? "",
+			isBanned: false,
+		};
+	}, [user]);
+
+	const participantInfo = useMemo(() => {
+		if (!conversation?.user) return null;
+		return {
+			id: conversation.user.id,
+			fullName: conversation.user.fullName,
+			avatar: conversation.user.avatar ?? "",
+			isBanned: false,
+		};
+	}, [conversation]);
 
 	const [chat, setChat] = useState<Message[]>([]);
 	const [page, setPage] = useState(0);
@@ -36,50 +61,60 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 		channelId: conversation?.id,
 	});
 
-	const loadMessages = useCallback(async () => {
+	const loadMessages = async (targetPage: number, appendToTop = false) => {
 		if (!conversation || loading || !hasMore) return;
 		setLoading(true);
 
 		const container = scrollContainerRef.current;
-		const scrollHeightBefore = container?.scrollHeight || 0;
+		const prevScrollHeight = container?.scrollHeight || 0;
 
 		try {
-			const data = await getMessages(conversation.id, page);
+			const data = await getMessages(conversation.id, targetPage);
+
 			if (data.content.length === 0) {
 				setHasMore(false);
 			} else {
-				setChat((prev) => [...data.content.reverse(), ...prev]);
-				setPage((prev) => prev + 1);
+				const newMessages = data.content.reverse();
+				setChat((prev) =>
+					appendToTop ? [...newMessages, ...prev] : [...prev, ...newMessages]
+				);
+				setPage(targetPage + 1);
 			}
-		} catch (error) {
-			console.error("Failed to load messages", error);
+		} catch (err) {
+			console.error("Load message failed:", err);
 		} finally {
 			setLoading(false);
-			if (container) {
-				// Giữ vị trí scroll để không bị nhảy khi load thêm tin cũ
-				const scrollHeightAfter = container.scrollHeight;
-				container.scrollTop = scrollHeightAfter - scrollHeightBefore;
+			if (container && appendToTop) {
+				const newScrollHeight = container.scrollHeight;
+				container.scrollTop = newScrollHeight - prevScrollHeight;
 			}
 		}
-	}, [conversation, page, hasMore, loading]);
-
+	};
 	// Khi đổi conversation, reset chat và scroll xuống cuối cùng
 	useEffect(() => {
+		if (!conversation) return;
+
 		setChat([]);
 		setPage(0);
 		setHasMore(true);
 
 		(async () => {
-			await loadMessages();
-			endRef.current?.scrollIntoView({ behavior: "auto" });
+			await loadMessages(0, false);
+			console.log(chat);
+
+			setTimeout(() => {
+				endRef.current?.scrollIntoView({ behavior: "auto" });
+			}, 100);
 		})();
 	}, [conversation]);
 
 	// Khi scroll container, nếu scroll lên đầu sẽ load thêm tin nhắn cũ
 	const handleScroll = () => {
-		if (!scrollContainerRef.current) return;
-		if (scrollContainerRef.current.scrollTop === 0) {
-			loadMessages();
+		const container = scrollContainerRef.current;
+		if (!container || loading || !hasMore) return;
+
+		if (container.scrollTop < 100) {
+			loadMessages(page, true);
 		}
 	};
 
@@ -94,7 +129,8 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 			container.scrollHeight - container.scrollTop - container.clientHeight <
 			100;
 
-		setChat((prev) => [...prev, ...newMessages]);
+			const normalized = newMessages.map(normalizeMessage);
+		setChat((prev) => [...prev, ...normalized]);
 
 		if (isNearBottom) {
 			setTimeout(() => {
@@ -117,6 +153,33 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 		}
 	};
 
+	const normalizeMessage = (msg: WebSocketMessageDTO) => {
+		const senderId = parseInt(msg.sender);
+
+		let sender: UserDTO | null = null;
+
+		if (senderId === userInfo?.id) {
+			sender = userInfo;
+		} else if (senderId === participantInfo?.id) {
+			sender = participantInfo;
+		}
+
+		return {
+			id: msg.id,
+			content: msg.content,
+			sender: sender ?? {
+				id: senderId,
+				fullName: "Unknown",
+				avatar: "",
+				isBanned: false,
+			},
+			createdAt: new Date(msg.timestamp).toISOString(),
+			images: [],
+			channelId: msg.channelId,
+			type: msg.type || "CHAT",
+		};
+	};
+
 	const handleSend = () => {
 		if (!text.trim()) return;
 		sendMessage(text.trim());
@@ -133,7 +196,11 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 								<>
 									<img src={otherUser.avatar} alt={otherUser.fullName} />
 									<div className="texts">
-										<span><Link to={`/user/${otherUser.id}`}>{otherUser.fullName}</Link></span>
+										<span>
+											<Link to={`/user/${otherUser.id}`}>
+												{otherUser.fullName}
+											</Link>
+										</span>
 										{/* <p>Đang hoạt động</p> */}
 									</div>
 								</>
@@ -146,7 +213,11 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 						</div>
 					</div>
 
-					<div className="center" onScroll={handleScroll} ref={scrollContainerRef}>
+					<div
+						className="center"
+						onScroll={handleScroll}
+						ref={scrollContainerRef}
+					>
 						{!hasMore && <p className="last-message">Tin nhắn cũ nhất</p>}
 						{loading && <p className="loading-message">Đang tải thêm...</p>}
 						{chat.map((message) => (
@@ -213,8 +284,9 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 					</div>
 				</div>
 			) : (
-				
-				<div className="message-chat"><img src="" alt="" /></div>
+				<div className="message-chat">
+					<img src="" alt="" />
+				</div>
 			)}
 		</>
 	);
