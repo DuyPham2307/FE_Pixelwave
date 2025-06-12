@@ -58,13 +58,10 @@ const PostCard: React.FC<PostProps> = (props) => {
 				await unlikePost(post.id);
 				setIsLiked(false);
 				setLikeCount((prev) => Math.max(0, prev - 1));
-				toast.success("Unlike post successfully!");
 			} else {
 				await likePost(post.id);
 				setIsLiked(true);
 				setLikeCount((prev) => prev + 1);
-
-				toast.success("Like post successfully!");
 			}
 		} catch (error) {
 			console.error("Error handling reaction:", error);

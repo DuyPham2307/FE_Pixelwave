@@ -23,7 +23,6 @@ const Profile = () => {
 				setProfile(response);
 				return response;
 			} catch (error) {
-				toast.error("Can't get profile user from id");
 				console.log("profilePage", error);
 				setNotFound(true);
 				throw error;

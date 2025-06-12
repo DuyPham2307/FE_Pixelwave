@@ -72,7 +72,9 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 		if (post.tagUserCount > 0) {
 			getTaggedUserOfPost(post.id)
 				.then(setTaggedUsers)
-				.catch((err) => toast.error("Failed to fetch tagged users", err));
+				.catch((err) =>
+					toast.error("Không thể lấy danh sách người dùng được nhắc đến", err)
+				);
 		}
 	}, []);
 
@@ -84,13 +86,10 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 				await unlikePost(post.id);
 				setIsLiked(false);
 				setLikeCount((prev) => Math.max(0, prev - 1));
-				toast.success("Unlike post successfully!");
 			} else {
 				await likePost(post.id);
 				setIsLiked(true);
 				setLikeCount((prev) => prev + 1);
-
-				toast.success("Like post successfully!");
 			}
 		} catch (error) {
 			console.error("Error handling reaction:", error);
@@ -115,7 +114,7 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 		setLoading(true);
 		try {
 			await deletePostById(postId);
-			toast.success("Delete post successfully!");
+			toast.success("Xóa bài viết thành công");
 			navigate(`/user/${userId}`);
 			setTimeout(() => {
 				window.location.reload(); // Reload trang sau khi navigate
@@ -129,10 +128,11 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 	};
 
 	const navigateToPage = (userId: number) => {
-		navigate(`/user/${userId}`);
+		console.log(userId);
 		setShowTagged(false);
 		onClose();
-	}
+		window.location.href = `/user/${userId}`;
+	};
 
 	return (
 		<div className="post-details-modal">
@@ -154,7 +154,11 @@ const PostDetails: React.FC<PostDetailsProps> = ({
 					{showTagged && (
 						<div className="list">
 							{taggedUsers.map((user) => (
-								<div key={user.id} className="item" onClick={() => navigateToPage(user.id)}>
+								<div
+									key={user.id}
+									className="item"
+									onClick={() => navigateToPage(user.id)}
+								>
 									<img src={user.avatar} alt="" />
 									{user.fullName}
 								</div>

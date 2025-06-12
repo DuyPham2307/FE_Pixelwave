@@ -18,7 +18,6 @@ const SuggestionBar = () => {
 			try {
 				const data = await getRecommendUser(5);
 				setUserRecommend(data);
-				toast.success("get rcm");
 				console.log(data);
 			} catch (error) {
 				console.error("Error handling reaction:", error);
@@ -33,11 +32,11 @@ const SuggestionBar = () => {
 	const requestAddFriend = async (userId: number) => {
 		try {
 			await addFriend(userId);
-			toast.success("Send add friend request success!")
+			toast.success("Đã gửi lời mời kết bạn!")
 			setUserRecommend((prev) => prev.filter((user) => user.id !== userId));
 		} catch (error) {
 			console.log(error);
-			toast.error("Send add friend request fail!")
+			toast.error("Lỗi khi gửi lời mời kết bạn!")
 		}
 	}
 

@@ -62,7 +62,6 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 						setFetchPosts(response.posts);
 					} catch (error) {
 						console.error("getPost error: ", error);
-						toast.error("Can't fetch post from userId");
 					}
 				} else {
 					setFetchPosts(userPosts);
@@ -79,7 +78,6 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 						setFetchPosts(response.posts);
 					} catch (error) {
 						console.error("get tagged post error: ", error);
-						toast.error("Can't fetch tagged posts");
 					}
 				} else {
 					setFetchPosts(taggedPosts);
@@ -97,7 +95,7 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 			window.history.pushState({}, "", `/user/p/${postId}`);
 		} catch (error) {
 			console.error("Showpost error: ", error);
-			toast.error("Can't Showpost from post Id");
+			toast.error("Gặp vấn đề với quyền truy cập khi mở bài viết");
 		}
 	};
 
@@ -134,40 +132,40 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 	const requestFollow = async (userId: number) => {
 		try {
 			await followUser(userId);
-			toast.success("Send follow request success!");
+			toast.success("Follow người dùng thành công!");
 		} catch (error) {
 			console.log(error);
-			toast.error("Send follow request fail!");
+			toast.error("Follow người dùng thất bại");
 		}
 	};
 
 	const requestUnFollow = async (userId: number) => {
 		try {
 			await unFollowUser(userId);
-			toast.success("Send unfollow request success!");
+			toast.success("Hủy follow người dùng thành công");
 		} catch (error) {
 			console.log(error);
-			toast.error("Send unfollow request fail!");
+			toast.error("Hủy follow người dùng thất bại");
 		}
 	};
 
 	const requestBlock = async (userId: number) => {
 		try {
 			await blockUser(userId);
-			toast.success("Block success!");
+			toast.success("Đã chặn người dùng!!!");
 		} catch (error) {
 			console.log(error);
-			toast.error("Block failed!");
+			toast.error("Lỗi khi chặn người dùng");
 		}
 	};
 
 	const requestUnBlock = async (userId: number) => {
 		try {
 			await unblockUser(userId);
-			toast.success("Unblock success!");
+			toast.success("Hủy chặn người dùng!");
 		} catch (error) {
 			console.log(error);
-			toast.error("Unblock failed!");
+			toast.error("Lỗi khi hủy chặn người dùng");
 		}
 	};
 
