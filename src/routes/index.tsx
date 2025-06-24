@@ -27,6 +27,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import Account from "@/pages/admin/Account";
 import PostReport from "@/pages/admin/PostReport";
 import UserReport from "@/pages/admin/UserReport";
+import SearchResultPage from "@/pages/user/SearchResultPage";
 
 const AppRoutes = () => {
 	return (
@@ -130,14 +131,22 @@ const AppRoutes = () => {
 							</ChatLayout>
 						}
 					/>
-									<Route
-					path="/user/:id"
-					element={
-						<MainLayout>
-							<Profile />
-						</MainLayout>
-					}
-				/>
+					<Route
+						path="/user/:id"
+						element={
+							<MainLayout>
+								<Profile />
+							</MainLayout>
+						}
+					/>
+					<Route
+						path="/user/search"
+						element={
+							<MainLayout>
+								<SearchResultPage />
+							</MainLayout>
+						}
+					/>
 				</Route>
 
 				{/* Route cho các trang công khai không cần xác thực */}
@@ -186,14 +195,14 @@ const AppRoutes = () => {
 							</AdminLayout>
 						}
 					/>
-									<Route
-					path="/admin/user/:id"
-					element={
-						<AdminLayout>
-							<Profile />
-						</AdminLayout>
-					}
-				/>
+					<Route
+						path="/admin/user/:id"
+						element={
+							<AdminLayout>
+								<Profile />
+							</AdminLayout>
+						}
+					/>
 				</Route>
 				<Route path="*" element={<NotFoundPage />} />
 			</Routes>

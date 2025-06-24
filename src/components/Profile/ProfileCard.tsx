@@ -195,7 +195,7 @@ const ProfileCard: React.FC<UserDetailResponse> = (props) => {
 				""
 			)}
 			<div className="profile-header">
-				<img src={props.avatar} alt="" className="avatar" />
+				<img src={props.avatar || `https://i.pravatar.cc/150?img=${profileUserId}`} alt="" className="avatar" />
 				<div className="info">
 					<div className="tilte">
 						<span className="name">{props.fullName}</span>

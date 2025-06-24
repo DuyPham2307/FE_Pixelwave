@@ -51,6 +51,14 @@ export interface PostDetail {
   images: ImageDTO[];
 }
 
+export interface PostDetailPage {
+  content: PostDetail[] | [];
+  totalPages: number | 0;
+  totalElements: number | 0;
+  pageSize: number | 10;
+  currentPage: number | 1;
+}
+
 export interface PostSimplePage {
   posts: PostSimple[] | [];
   totalPages: number | 0;

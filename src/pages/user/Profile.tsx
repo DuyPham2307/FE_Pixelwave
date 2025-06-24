@@ -2,7 +2,6 @@ import ProfileCard from "@/components/Profile/ProfileCard";
 import { UserDetailResponse } from "@/models/UserModel";
 import { getUserById } from "@/services/userService";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import NotFoundPage from "../NotFoundPage";
 

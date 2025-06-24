@@ -23,6 +23,7 @@ const Navbar = () => {
 	const [showNotiDropdown, setShowNotiDropdown] = useState(false);
 	const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
 	const [hasUnread, setHasUnread] = useState(false);
+	const [searchText, setSearchText] = useState("");
 
 	// Load initial
 	useEffect(() => {
@@ -42,6 +43,14 @@ const Navbar = () => {
 			setHasUnread(true);
 		},
 	});
+
+	const handleSearch = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (searchText.trim()) {
+			navigate(`/user/search?query=${encodeURIComponent(searchText.trim())}`);
+			setSearchText(""); // Clear search input after submitting
+		}
+	};
 
 	const handleLogout = () => {
 		setLoading(true);
@@ -64,12 +73,18 @@ const Navbar = () => {
 				>
 					<img src={logo} alt="Logo for Wavelink" />
 				</span>
-				<div className="search-bar">
-					<button className="search-btn">
+				<form className="search-bar" onSubmit={handleSearch}>
+					<button type="submit" className="search-btn">
 						<Search />
 					</button>
-					<input type="text" placeholder="Search..." className="search-input" />
-				</div>
+					<input
+						type="text"
+						placeholder="Search..."
+						className="search-input"
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+					/>
+				</form>
 				<div className="user-interaction">
 					<div
 						className="request-friend-pending"
