@@ -52,7 +52,7 @@ const SuggestionBar = () => {
 				<div className="list">
 					{userRecommend.map((user) => (
 						<div key={user.id} className="item">
-							<img src={user.avatar || "https://avatar.iran.liara.run/public/30"} alt={user.fullName} className="avatar" />
+							<img src={user.avatar || `https://i.pravatar.cc/150?img=${user.id}`} alt={user.fullName} className="avatar" />
 							<div className="info">
 								<h3 className="name">
 									<a href={`/user/${user.id}`}>{user.fullName}</a>

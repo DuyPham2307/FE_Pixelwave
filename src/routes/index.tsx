@@ -23,7 +23,6 @@ import PublicRoute from "@/components/Route/PublicRoute";
 import PostPage from "@/pages/user/PostPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import AdminLayout from "@/layouts/AdminLayout";
-import Dashboard from "@/pages/admin/Dashboard";
 import Account from "@/pages/admin/Account";
 import PostReport from "@/pages/admin/PostReport";
 import UserReport from "@/pages/admin/UserReport";
@@ -163,14 +162,16 @@ const AppRoutes = () => {
 				{/* Các route khác cho admin hoặc chưa xác thực */}
 				{/* Các route admin có thể ở đây khi có role 'ADMIN' */}
 				<Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-					<Route
+
+										<Route
 						path="/admin/"
 						element={
 							<AdminLayout>
-								<Dashboard />
+								<UserReport />
 							</AdminLayout>
 						}
 					/>
+
 					<Route
 						path="/admin/accounts"
 						element={
@@ -184,14 +185,6 @@ const AppRoutes = () => {
 						element={
 							<AdminLayout>
 								<PostReport />
-							</AdminLayout>
-						}
-					/>
-					<Route
-						path="/admin/user-reports"
-						element={
-							<AdminLayout>
-								<UserReport />
 							</AdminLayout>
 						}
 					/>

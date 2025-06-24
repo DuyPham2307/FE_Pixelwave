@@ -79,6 +79,12 @@ const PostReport = () => {
 
 	return (
 		<div className="post-report">
+			{postReport.length === 0 && (
+				<div className="no-report">
+					<h2>Không có báo cáo bài viết nào</h2>
+					<p>Hãy kiểm tra lại sau.</p>
+				</div>
+			)}
 			<div className="post-list-wrapper">
 				<div className="post-list">
 					{postReport.map((post) => (
@@ -138,7 +144,9 @@ const PostReport = () => {
 								<p>{report.reporterUsername}</p>
 								<span>{new Date(report.reportedAt).toLocaleString()}</span>
 							</div>
-							<p className="report-content">{report.reason} - {report.description}</p>
+							<p className="report-content">
+								{report.reason} - {report.description}
+							</p>
 							<button
 								onClick={() => {
 									setSelectedReport(report.reportId);

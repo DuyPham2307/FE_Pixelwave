@@ -89,7 +89,10 @@ const SearchResultPage = () => {
 										navigate(`/user/${u.id}`);
 									}}
 								>
-									<img src={u.avatar || `https://i.pravatar.cc/150?img=${u.id}`} alt="avatar" />
+									<img
+										src={u.avatar || `https://i.pravatar.cc/150?img=${u.id}`}
+										alt="avatar"
+									/>
 									<span>{u.fullName}</span>
 								</li>
 							))}
@@ -106,10 +109,25 @@ const SearchResultPage = () => {
 						<ul>
 							{posts.map((p) => (
 								<li key={p.id}>
-									<div className="img-wrapper"><img src={p.images[0].url} alt="" className="post-img" /></div>
+									<div
+										className="img-wrapper"
+										onClick={() => navigate(`/user/p/${p.id}`)}
+									>
+										<img src={p.images[0].url} alt="" className="post-img" />
+									</div>
 									<div className="post-info">
-									<p>{p.caption}</p>
-										<p>{formatRelativeTime(p.createdAt)}</p>
+										<div className="post-user">
+											<img src={p.postUser.avatar} alt="" />
+											<div>
+												<span
+													onClick={() => navigate(`/user/${p.postUser.id}`)}
+												>
+													{p.postUser.fullName}
+												</span>
+												<p>{formatRelativeTime(p.createdAt)}</p>
+											</div>
+										</div>
+										<p>{p.caption}</p>
 									</div>
 								</li>
 							))}

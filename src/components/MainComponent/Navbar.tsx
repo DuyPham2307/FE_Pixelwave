@@ -121,7 +121,7 @@ const Navbar = () => {
 						)}
 					</div>
 					<div className="profile">
-						<img src={user?.avatar} alt="logo for user" />
+						<img src={user?.avatar || `https://i.pravatar.cc/150?img=${user?.id}`} alt="logo for user" />
 						<ul className="menu">
 							<li
 								className="item"

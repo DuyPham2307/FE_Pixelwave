@@ -29,7 +29,7 @@ export function useMessageSocket(config: MessageSocketConfig) {
 					`/topic/conversation/${config.channelId}`,
 					(message) => {
 						const body = JSON.parse(message.body);
-						setMessages((prev) => [...prev, body]);
+						setMessages(body);
 					}
 				);
 				console.log("📨 Connected to conversation channel:", config.channelId);

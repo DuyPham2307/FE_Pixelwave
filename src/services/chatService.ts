@@ -1,4 +1,5 @@
 import { Conversation, MessagePageResponse } from "@/models/Conversation";
+import { ImageDTO } from "@/models/ImageModel";
 import api from "@/utils/axiosInstance";
 
 export const getConversations = async (
@@ -43,3 +44,12 @@ export const sendImages = async (
 	);
 	return res.data;
 };
+
+export const getImages = async (
+	conversationId: string,
+): Promise<ImageDTO[]> => {
+	const res = await api.get(
+		`/api/chat/conversation/${conversationId}/image`
+	);
+	return res.data;
+}

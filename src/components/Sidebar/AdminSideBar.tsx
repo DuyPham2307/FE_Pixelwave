@@ -1,5 +1,5 @@
 import "@/styles/components/_sidebar.scss";
-import { FileWarning, House, SquareUserRound, UserMinus } from "lucide-react";
+import { FileWarning, SquareUserRound, UserMinus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const AdminSideBar = () => {
@@ -9,16 +9,12 @@ const AdminSideBar = () => {
 	return (
 		<div className="sidebar">
 			<ul className="list">
-				{/* <li className={`item ${!currentPath ? "isLocate" : ""}`}>
-					<Link to="/admin">
-						<House />
-						DashBoard
-					</Link>
-				</li> */}
-				<li className={`item ${currentPath === "accounts" ? "isLocate" : ""}`}>
-					<Link to="/admin/accounts">
-						<SquareUserRound />
-						Accounts
+				<li
+					className={`item ${currentPath === "" ? "isLocate" : ""}`}
+				>
+					<Link to="/admin/">
+						<UserMinus />
+						User reports
 					</Link>
 				</li>
 				<li
@@ -29,12 +25,11 @@ const AdminSideBar = () => {
 						Post reports
 					</Link>
 				</li>
-				<li
-					className={`item ${currentPath === "user-reports" ? "isLocate" : ""}`}
-				>
-					<Link to="/admin/user-reports">
-						<UserMinus />
-						User reports
+
+				<li className={`item ${currentPath === "accounts" ? "isLocate" : ""}`}>
+					<Link to="/admin/accounts">
+						<SquareUserRound />
+						Accounts
 					</Link>
 				</li>
 			</ul>
