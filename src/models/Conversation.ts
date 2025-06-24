@@ -1,4 +1,5 @@
 import { UserDTO } from "./UserModel";
+import { ImageDTO } from '@/models/ImageModel';
 
 export interface Conversation {
   id: string;
@@ -12,7 +13,7 @@ export interface Message {
   content: string;
   sender: UserDTO;
   createdAt: string;  // ISO date string, bạn có thể đổi thành Date nếu muốn parse
-  images: string[];   // mảng URL ảnh (ở đây là array rỗng)
+  images: ImageDTO[];   // mảng URL ảnh (ở đây là array rỗng)
 }
 
 export interface WebSocketMessageDTO{

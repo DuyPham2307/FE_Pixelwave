@@ -6,16 +6,9 @@ const ChatList = () => {
 	const [chats, setChats] = useState([]);
 	const [input, setInput] = useState("");
 
-	const { currentUser } = useUserStore();
-	const { changeChat } = useChatStore();
-
 	useEffect(() => {
 		console.log("Updated chats:", chats);
 	}, [chats]);
-
-	const handleSelect = async (chat) => {
-
-	};
 
 	const filteredChats = chats.filter((c) =>
 		c.user.username.toLowerCase().includes(input.toLowerCase())

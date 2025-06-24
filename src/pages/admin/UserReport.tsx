@@ -41,7 +41,7 @@ const UserReport = () => {
 					status: "PENDING",
 					page,
 					size,
-				});				
+				});
 
 				setReports(data.content);
 				setTotalPages(data.totalPages);
@@ -57,9 +57,9 @@ const UserReport = () => {
 		loadReports();
 	}, []);
 
-	const filteredReports = reports.filter((report) =>
-		report.reporter.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-	);
+	// const filteredReports = reports.filter((report) =>
+	// 	report.reporterI.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+	// );
 
 	const selectedReport = reports.find((r) => r.id === selectedReportId) || null;
 
@@ -78,7 +78,7 @@ const UserReport = () => {
 						className="search-input"
 					/>
 
-					{filteredReports.map((report) => (
+					{reports.map((report) => (
 						<div
 							key={report.id}
 							className={`user-item ${
@@ -86,30 +86,36 @@ const UserReport = () => {
 							}`}
 							onClick={() => setSelectedReportId(report.id)}
 						>
-							<img src={report.reporter.avatar} alt="Avatar" />
+							{/* <img src={report.reporter.avatar} alt="Avatar" />
 							<div className="user-info">
 								<p className="user-name">{report.reporter.fullName}</p>
 								<p className={`report-status ${report.status.toLowerCase()}`}>
 									{report.status === "PENDING" ? "Chưa xử lý" : "Đã xử lý"}
 								</p>
+							</div> */}
+							<div className="user-info">
+								<p className={`report-status ${report.status.toLowerCase()}`}>
+									Report by user {""}
+									<Link to={`/admin/user/${report.reporterId}`}>
+										<u>#{report.reporterId}</u>
+									</Link>
+								</p>
 							</div>
-							{report.status === "PENDING" && (
-								<button
-									className="btn-resolve"
-									onClick={(e) => {
-										e.stopPropagation();
-										handleOpenModal(report);
-									}}
-								>
-									Xử lý
-								</button>
-							)}
+
+							<button
+								className="btn-resolve"
+								onClick={(e) => {
+									e.stopPropagation();
+									handleOpenModal(report);
+								}}
+							>
+								{report.status}
+							</button>
+
 						</div>
 					))}
 
-					{filteredReports.length === 0 && (
-						<p>Không tìm thấy người dùng phù hợp.</p>
-					)}
+					{reports.length === 0 && <p>Không tìm thấy người dùng phù hợp.</p>}
 
 					<div className="pagination">
 						<button
@@ -117,10 +123,10 @@ const UserReport = () => {
 							onClick={() => setPage((prev) => prev - 1)}
 						>
 							Trước
-						</button> {" "}
+						</button>{" "}
 						<span>
 							{page + 1} / {totalPages}
-						</span> {" "}
+						</span>{" "}
 						<button disabled={last} onClick={() => setPage((prev) => prev + 1)}>
 							Tiếp
 						</button>
@@ -172,16 +178,19 @@ const UserReport = () => {
 				</div>
 			)}
 
-
-
 			<div className="user-detail">
 				{selectedReport ? (
 					<>
-						<h2>Chi tiết báo cáo bài viết <Link to={`/user/p/${selectedReport.postId}`}>#{selectedReport.postId}</Link></h2>
+						<h2>
+							Chi tiết báo cáo bài viết{" "}
+							<Link to={`/user/p/${selectedReport.postId}`}>
+								#{selectedReport.postId}
+							</Link>
+						</h2>
 						<div className="report-card">
 							<div className="report-header">
-								<img src={selectedReport.reporter.avatar} alt="Avatar" />
-								<p>{selectedReport.reporter.fullName}</p>
+								{/* <img src={selectedReport.reporter.avatar} alt="Avatar" />
+								<p>{selectedReport.reporter.fullName}</p> */}
 								<span>
 									{new Date(selectedReport.createdAt).toLocaleString()}
 								</span>

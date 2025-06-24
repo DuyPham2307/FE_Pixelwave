@@ -1,4 +1,5 @@
 import {
+	PaginatedPostReports,
 	PaginatedReports,
 	ReportDetail,
 	ReportPayload,
@@ -59,4 +60,14 @@ export const fetchUserReports = async (
 
 export const banUserViolance = async (userId: number) => {
 	await api.post(`/api/reports/user/${userId}/ban`);
+};
+
+export const getPostReportList = async (): Promise<PaginatedPostReports> => {
+	try {
+		const res = await api.get<PaginatedPostReports>("/api/reports/posts");
+		return res.data;
+	} catch (error) {
+		console.error("Error fetching post reports:", error);
+		throw error; // Rethrow the error to handle it in the calling function
+	}
 };

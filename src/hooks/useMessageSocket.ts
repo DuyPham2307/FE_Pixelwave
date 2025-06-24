@@ -1,14 +1,15 @@
-import { Client } from "@stomp/stompjs";
+import { Client, StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useEffect, useRef, useState } from "react";
 
-interface WebSocketConfig {
-	token: string;
-	channelId: string;
-	userId: number | undefined;
+interface MessageSocketConfig {
+	token: string | null;
+	userId: number | undefined | null;
+	channelId: string | undefined | null;
 }
 
-export function useWebSocket(config: WebSocketConfig) {
+export function useMessageSocket(config: MessageSocketConfig) {
+	const subscriptionRef = useRef<StompSubscription | null>(null);
 	const [connected, setConnected] = useState(false);
 	const [messages, setMessages] = useState<any[]>([]);
 	const clientRef = useRef<Client | null>(null);
@@ -24,32 +25,22 @@ export function useWebSocket(config: WebSocketConfig) {
 			},
 			onConnect: () => {
 				setConnected(true);
-
-				client.subscribe(
+				const subscription = client.subscribe(
 					`/topic/conversation/${config.channelId}`,
 					(message) => {
 						const body = JSON.parse(message.body);
-						console.log("📨 Server returned:", body);
-						console.log("📨 Server returned:", message);
-
 						setMessages((prev) => [...prev, body]);
 					}
 				);
-
-				client.subscribe(
-					`/user/queue/notifications/${config.userId}`,
-					(message) => {
-						const notification = JSON.parse(message.body);
-						console.log("🔔 Notification:", notification);
-					}
-				);
+				console.log("📨 Connected to conversation channel:", config.channelId);
+				// 👉 Lưu subscription để hủy khi channelId thay đổi
+				clientRef.current = client;
+				subscriptionRef.current = subscription;
 			},
 			onDisconnect: () => {
 				setConnected(false);
-				console.log("Disconnected");
-			},
-			debug: (str) => {
-				console.log("STOMP DEBUG:", str);
+				console.log("📨 Deconnect to conversation channel:", config.channelId);
+				subscriptionRef.current?.unsubscribe();
 			},
 		});
 
@@ -57,13 +48,13 @@ export function useWebSocket(config: WebSocketConfig) {
 		clientRef.current = client;
 
 		return () => {
+			subscriptionRef.current?.unsubscribe();
 			client.deactivate();
 		};
-	}, [config.token, config.channelId, config.userId]);
+	}, [config.token, config.channelId]);
 
 	const sendMessage = (text: string) => {
-		if (!clientRef.current || !clientRef.current.connected) return;
-		if (config.userId === undefined) return;
+		if (!clientRef.current?.connected) return;
 
 		const message = {
 			sender: config.userId.toString(),

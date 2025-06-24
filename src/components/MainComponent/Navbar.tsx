@@ -9,10 +9,10 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import FriendRequestDropdown from "../Dropdown/FriendRequestDropdown";
+import { useNotificationSocket } from "@/hooks/useNotificationSocket";
+import NotificationDropdown from "../Dropdown/NotificationDropdown";
 import { NotificationDTO } from "@/models/Notification";
 import { notificationService } from "@/services/notificationService";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import NotificationDropdown from "../Dropdown/NotificationDropdown";
 
 const Navbar = () => {
 	const navigate = useNavigate();
@@ -24,45 +24,24 @@ const Navbar = () => {
 	const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
 	const [hasUnread, setHasUnread] = useState(false);
 
-	// Load unread notifications ban đầu
-	const fetchUnreadNotifications = async () => {
-		try {
-			const res = await notificationService.getNotifications(0, 20, true);
-			setNotifications(res.data.content);
-			setHasUnread(res.data.totalElements > 0);
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
+	// Load initial
 	useEffect(() => {
 		if (user?.id) {
-			fetchUnreadNotifications();
+			notificationService.getNotifications(0, 20).then((res) => {
+				setNotifications(res.data.content);
+				setHasUnread(res.data.content.some((n) => !n.read));
+			});
 		}
 	}, [user]);
 
-	// Xử lý khi có notification mới từ WebSocket
-	const handleNotificationReceived = (newNoti: NotificationDTO) => {
-		setNotifications((prev) => [newNoti, ...prev]);
-		setHasUnread(true);
-	};
-
-	useWebSocket({
+	useNotificationSocket({
 		token: localStorage.getItem("accessToken")!,
 		userId: user?.id,
-		onNotificationReceived: handleNotificationReceived,
+		onNotification: (noti) => {
+			setNotifications((prev) => [noti, ...prev]);
+			setHasUnread(true);
+		},
 	});
-
-	const handleMarkAllAsRead = async () => {
-		try {
-			await notificationService.markAllAsRead();
-			setHasUnread(false);
-			setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-		} catch (err) {
-			console.error(err);
-			toast.error("Đánh dấu đã đọc thất bại");
-		}
-	};
 
 	const handleLogout = () => {
 		setLoading(true);
@@ -109,7 +88,10 @@ const Navbar = () => {
 					<div className="notifications" style={{ position: "relative" }}>
 						<button
 							className="notification-btn"
-							onClick={() => setShowNotiDropdown((prev) => !prev)}
+							onClick={() => {
+								setShowNotiDropdown((prev) => !prev);
+								setHasUnread(false); // Reset chấm đỏ khi mở dropdown
+							}}
 						>
 							<Bell />
 							{hasUnread && <span className="noti-dot" />}
@@ -118,7 +100,8 @@ const Navbar = () => {
 						{showNotiDropdown && (
 							<NotificationDropdown
 								notifications={notifications}
-								onMarkAllAsRead={handleMarkAllAsRead}
+								setNotifications={setNotifications}
+								onClose={() => setShowNotiDropdown(false)}
 							/>
 						)}
 					</div>

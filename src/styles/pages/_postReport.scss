@@ -23,9 +23,11 @@
 		scroll-behavior: smooth;
 
 		.post-list {
-			flex: 1;
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(160px, auto));
+			// flex: 1;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			gap: 10px;
 
 			h2 {
 				font-size: 1.25rem;
@@ -53,17 +55,43 @@
 				}
 				.post-meta {
 					display: flex;
+					flex-direction: column;
+					gap: 0.25rem;
 					justify-content: space-between;
 					margin-top: 0.5rem;
 					color: #666;
-					font-size: 0.9rem;
+					font-size: 0.875rem;
+
+					span {
+						display: inline-flex;
+						gap: 0.5rem;
+						align-items: center;
+
+						.post-report__count{
+							background-color: red;
+							border-radius: 50%;
+							width: 20px;
+							height: 20px;
+							text-align: center;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							font-size: 0.8rem;
+							color: white;
+						}
+					}
+
+					span:first-child {
+						font-size: 1rem;
+						font-weight: bold;
+					}
 				}
 			}
 		}
 	}
 
 	.post-detail {
-		width: 70%;
+		max-width: 70%;
 		height: 80vh;
 		overflow-y: scroll;
 		scrollbar-width: none;
@@ -110,9 +138,13 @@
 			border-radius: 8px;
 			padding: 1rem;
 			margin-bottom: 1.5rem;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
 
 			p {
-				margin-bottom: 0.5rem;
+				display: inline-flex;
+				gap: 10px;
 			}
 			.detail-images {
 				display: flex;
@@ -158,7 +190,6 @@
 		}
 	}
 }
-
 
 .modal-overlay {
 	position: fixed;

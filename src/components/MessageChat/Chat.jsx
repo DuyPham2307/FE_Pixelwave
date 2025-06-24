@@ -13,9 +13,6 @@ const MesssageChat = () => {
 
 	const endRef = useRef();
 
-	const { currentUser } = useUserStore();
-	const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, } = useChatStore();
-
 	useEffect(() => {
 		endRef.current.scrollIntoView({ behavior: "smooth" });
 	}, [endRef]);

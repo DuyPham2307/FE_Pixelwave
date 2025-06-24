@@ -32,15 +32,17 @@ export const ReportModal = ({ postId, open, onClose }: ReportModalProps) => {
 		setLoading(true);
 		try {
 			await createReport({ postId, reason, description });
-      setReason("");
-      setDescription("");
 			onClose();
 			toast.success("Report submitted successfully.");
 		} catch (err) {
+			if (err.code === "ERR_BAD_RESPONSE") {
+				toast.error("This post already reported!!!");
+			}
 			console.error("Report failed", err);
-			toast.error("Report failed!")
 		} finally {
 			setLoading(false);
+			setReason("");
+			setDescription("");
 		}
 	};
 

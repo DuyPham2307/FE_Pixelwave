@@ -4,15 +4,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { Camera, File, Info, Mic, Phone, Smile, Video } from "lucide-react";
 import "@/styles/components/_messengerChat.scss";
 import { formatRelativeTime } from "@/utils/formatTimestamp";
-import { getMessages } from "@/services/chatService";
+import { getMessages, sendImages } from "@/services/chatService";
 import {
 	Conversation,
 	Message,
 	WebSocketMessageDTO,
 } from "@/models/Conversation";
-import { useWebSocket } from "@/hooks/useWebSocket";
+// import { useWebSocket } from "@/hooks/useWebSocket";
 import { Link } from "react-router-dom";
 import { UserDTO } from "@/models/UserModel";
+import { useMessageSocket } from "@/hooks/useMessageSocket";
+import toast from "react-hot-toast";
 
 interface MesssageChatProps {
 	conversation: Conversation | null;
@@ -48,14 +50,10 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 	const [loading, setLoading] = useState(false);
 	const [text, setText] = useState("");
 	const [emojiOpen, setEmojiOpen] = useState(false);
-	const [img, setImg] = useState<{ file: File | null; url: string }>({
-		file: null,
-		url: "",
-	});
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const endRef = useRef<HTMLDivElement | null>(null);
 
-	const { connected, messages, sendMessage } = useWebSocket({
+	const { connected, messages, sendMessage } = useMessageSocket({
 		token: localStorage.getItem("accessToken")!,
 		userId: user?.id,
 		channelId: conversation?.id,
@@ -103,7 +101,7 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 			console.log(chat);
 
 			setTimeout(() => {
-				endRef.current?.scrollIntoView({ behavior: "auto" });
+				endRef.current?.scrollIntoView({ behavior: "smooth" });
 			}, 100);
 		})();
 	}, [conversation]);
@@ -129,7 +127,7 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 			container.scrollHeight - container.scrollTop - container.clientHeight <
 			100;
 
-			const normalized = newMessages.map(normalizeMessage);
+		const normalized = newMessages.map(normalizeMessage);
 		setChat((prev) => [...prev, ...normalized]);
 
 		if (isNearBottom) {
@@ -144,12 +142,36 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 		setEmojiOpen(false);
 	};
 
-	const handleImg = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files && e.target.files[0]) {
-			setImg({
-				file: e.target.files[0],
-				url: URL.createObjectURL(e.target.files[0]),
-			});
+	const handleImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (!e.target.files || !conversation || !user) return;
+
+		const files = Array.from(e.target.files);
+		const previews = files.map((file, idx) => ({
+			id: Date.now() + idx, // Dummy id for preview
+			url: URL.createObjectURL(file),
+		}));
+
+		try {
+			await sendImages(conversation.id, files);
+			const newMsg = {
+				id: 99999, // Tạm thời, sẽ cập nhật sau khi nhận từ server
+				content: "",
+				sender: userInfo as UserDTO,
+				createdAt: new Date().toISOString(),
+				images: previews,
+				channelId: conversation.id,
+				type: "CHAT",
+			};
+			setChat((prev) => [...prev, newMsg]);
+
+			// Scroll sau mỗi ảnh nếu muốn
+			setTimeout(() => {
+				endRef.current?.scrollIntoView({ behavior: "smooth" });
+			}, 100);
+
+		} catch (err) {
+			console.error("Upload failed", err);
+			toast.error("Failed to send images");
 		}
 	};
 
@@ -233,21 +255,14 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 									className="avatar"
 								/>
 								<div className="texts">
-									{message.images?.map((imgUrl, i) => (
-										<img key={i} src={imgUrl} alt="attachment" />
+									{message.images?.map((img, i) => (
+										<img key={i} src={img.url} alt="attachment" />
 									))}
-									<p>{message.content}</p>
+									{message.content && <p>{message.content}</p>}
 									<span>{formatRelativeTime(message.createdAt)}</span>
 								</div>
 							</div>
 						))}
-						{img.url && (
-							<div className="message own">
-								<div className="texts">
-									<img src={img.url} alt="preview" />
-								</div>
-							</div>
-						)}
 						<div ref={endRef}></div>
 					</div>
 
@@ -256,9 +271,13 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 							<label htmlFor="file">
 								<File />
 							</label>
-							<input type="file" id="file" hidden onChange={handleImg} />
-							<Camera />
-							<Mic />
+							<input
+								type="file"
+								id="file"
+								hidden
+								onChange={handleImg}
+								multiple
+							/>
 						</div>
 						<input
 							type="text"

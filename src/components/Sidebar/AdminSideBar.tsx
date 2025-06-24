@@ -21,14 +21,14 @@ const AdminSideBar = () => {
 						Accounts
 					</Link>
 				</li>
-				{/* <li
+				<li
 					className={`item ${currentPath === "post-reports" ? "isLocate" : ""}`}
 				>
 					<Link to="/admin/post-reports">
 						<FileWarning />
 						Post reports
 					</Link>
-				</li> */}
+				</li>
 				<li
 					className={`item ${currentPath === "user-reports" ? "isLocate" : ""}`}
 				>

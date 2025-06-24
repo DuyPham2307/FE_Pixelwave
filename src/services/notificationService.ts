@@ -10,6 +10,12 @@ export const notificationService = {
 				...(isRead !== undefined && { isRead }),
 			},
 		}),
-
-	markAllAsRead: () => api.put(`/api/notifications/read-all`),
+	getAllNotifications: (page = 0, size = 20, unreadOnly = false) => {
+		const url =
+			`/api/notifications?page=${page}&size=${size}` +
+			(unreadOnly ? "&isRead=false" : "");
+		return api.get(url);
+	},
+	markAsRead: (id: number) => api.post(`/api/notifications/${id}/read`),
+	markAllAsRead: () => api.post(`/api/notifications/read-all`),
 };

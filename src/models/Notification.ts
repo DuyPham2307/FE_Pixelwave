@@ -16,7 +16,7 @@ export interface NotificationDTO {
   sender: UserDTO;
   type: NotificationType;
   content: string;
-  isRead: boolean;
+  read: boolean;
   createdAt: string; // hoặc `Date` nếu bạn parse về JS Date
   referenceId: number;
 }

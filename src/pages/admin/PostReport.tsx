@@ -1,126 +1,102 @@
-import { useState } from "react";
-import { PostDetail, PostSimple } from "@/models/PostModel";
-import { UserResponse } from "@/models/AuthModel";
+import { useEffect, useState } from "react";
 import "@/styles/pages/_postReport.scss";
-
-const fakePosts: PostSimple[] = Array.from({ length: 12 }, (_, i) => ({
-	id: i + 1,
-	imageUrl: `https://picsum.photos/seed/${i + 1}/300/200`,
-	likeCount: Math.floor(Math.random() * 100),
-	commentCount: Math.floor(Math.random() * 50),
-}));
-
-interface ReportDetail {
-	reporterId: number;
-	reportedId: number;
-	createAt: string;
-	content: string;
-	reporter: UserResponse;
-}
-
-type HandleType = "warning" | "error" | "normal";
-
-const fakePostDetail = (id: number): PostDetail => ({
-	id,
-	caption: `This is a caption for post ${id}`,
-	createdAt: new Date().toISOString(),
-	privacySetting: "public",
-	postUser: {
-		id: 1,
-		fullName: "John Doe",
-		avatar: "https://i.pravatar.cc/150?img=1",
-		role: "USER",
-	},
-	likeCount: 123,
-	commentCount: 45,
-	isTaggedUser: false,
-	liked: true,
-	tagUserCount: 3,
-	images: [
-		{ id: 3, url: `https://picsum.photos/seed/detail${id}a/300/200` },
-		{ id: 4, url: `https://picsum.photos/seed/detail${id}b/300/200` },
-	],
-});
-
-export const fakeReports = (postId: number): ReportDetail[] => [
-	{
-		reporterId: 1,
-		reportedId: postId,
-		createAt: new Date().toISOString(),
-		content: "Bài viết có nội dung không phù hợp.",
-		reporter: {
-			id: 1,
-			fullName: "Nguyễn Văn A",
-			avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-			role: "USER",
-		},
-	},
-	{
-		reporterId: 2,
-		reportedId: postId,
-		createAt: new Date(Date.now() - 86400000).toISOString(),
-		content: "Hình ảnh phản cảm.",
-		reporter: {
-			id: 2,
-			fullName: "Trần Thị B",
-			avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-			role: "USER",
-		},
-	},
-	{
-		reporterId: 3,
-		reportedId: postId,
-		createAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-		content: "Spam quảng cáo.",
-		reporter: {
-			id: 3,
-			fullName: "Lê Văn C",
-			avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-			role: "USER",
-		},
-	},
-];
+import { PostReportDetail } from "@/models/ReportModel";
+import {
+	deleteReportedPost,
+	getPostReportList,
+	updateReportStatus,
+} from "@/services/reportService";
+import { Captions, CircleUserRound } from "lucide-react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const PostReport = () => {
-	const [selectedPostId, setSelectedPostId] = useState<number | null>(1);
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [handleType, setHandleType] = useState<HandleType>("warning");
-	const [handleNote, setHandleNote] = useState("");
-	const [status, setStatus] = useState<"pending" | "done" | "cancel">(
-		"pending"
+	const [postReport, setPostReport] = useState<PostReportDetail[]>([]);
+	const [selectedPost, setSelectedPost] = useState<PostReportDetail | null>(
+		null
 	);
+	const [selectedReport, setSelectedReport] = useState<number | null>(null);
+	// const [showModal, setShowModal] = useState(false);
 
-	const selectedPostDetail =
-		selectedPostId !== null ? fakePostDetail(selectedPostId) : null;
-	const reports = selectedPostId !== null ? fakeReports(selectedPostId) : [];
+	useEffect(() => {
+		const fetchPostReports = async () => {
+			try {
+				const response = await getPostReportList();
+				console.log("Fetched post reports:", response.content);
+				setPostReport(response.content);
+			} catch (error) {
+				console.error("Failed to fetch post reports:", error);
+			}
+		};
 
-	const handleSubmit = () => {
-		// xử lý logic ở đây nếu cần gửi API
+		fetchPostReports();
+	}, []);
 
-		setStatus("done");
-		setIsModalOpen(false);
+	const handleCloseModal = () => {
+		setSelectedReport(null);
 	};
 
-	const handleCancel = () => {
-		setStatus("cancel");
-		setIsModalOpen(false);
+	const handleDeletePost = async () => {
+		if (!selectedPost || selectedReport === null) return;
+		try {
+			await deleteReportedPost(selectedPost.postId);
+			await updateReportStatus(selectedReport, "RESOLVED");
+			setSelectedReport(null);
+			handleCloseModal();
+			toast.success("Đã xoá bài viết và đánh dấu báo cáo đã xử lý");
+
+			// Xoá bài viết khỏi danh sách đang hiển thị
+			setPostReport((prev) =>
+				prev.filter((item) => item.postId !== selectedPost.postId)
+			);
+		} catch (err) {
+			console.error("Error deleting post/report:", err);
+		}
 	};
+
+	const handleRejectReport = async () => {
+		if (selectedReport === null) return;
+		try {
+			await updateReportStatus(selectedReport, "REJECTED");
+			setSelectedReport(null);
+			handleCloseModal();
+			toast.success("Đã bỏ qua báo cáo");
+
+			// Cập nhật lại danh sách báo cáo trong bài viết đang xem
+			setSelectedPost((prev) => {
+				if (!prev) return null;
+				return {
+					...prev,
+					reports: prev.reports.map((r) =>
+						r.reportId === selectedReport ? { ...r, status: "REJECTED" } : r
+					),
+				};
+			});
+		} catch (err) {
+			console.error("Error rejecting report:", err);
+		}
+	};
+
 	return (
 		<div className="post-report">
 			<div className="post-list-wrapper">
 				<div className="post-list">
-					{fakePosts.map((post) => (
+					{postReport.map((post) => (
 						<div
-							key={post.id}
+							key={post.postId}
 							className={`post-item ${
-								post.id === selectedPostId ? "selected" : ""
+								post.postId === selectedPost?.postId ? "selected" : ""
 							}`}
-							onClick={() => setSelectedPostId(post.id)}
+							onClick={() => setSelectedPost(post)}
 						>
-							<img src={post.imageUrl} alt="Post" />
 							<div className="post-meta">
-								<span>❤️ {post.likeCount}</span>
-								<span>💬 {post.commentCount}</span>
+								<span>
+									<CircleUserRound /> {post.authorUsername}
+									<span className="post-report__count">{post.reportCount}</span>
+								</span>
+								<span>
+									<Captions /> {post.caption}
+								</span>
 							</div>
 						</div>
 					))}
@@ -128,77 +104,65 @@ const PostReport = () => {
 			</div>
 			<div className="seperated"></div>
 
-			{selectedPostDetail && (
+			{selectedPost && (
 				<div className="post-detail">
 					<div className="header">
-						<h2>Chi tiết bài viết bị báo cáo</h2>
-						<span className={`status ${status}`}>{status}</span>
-						{status === "pending" && (
-							<button
-								className="handle-btn"
-								onClick={() => setIsModalOpen(true)}
-							>
-								Solve
-							</button>
-						)}
+						<h2>
+							Reported post details{" "}
+							<Link to={`/user/p/${selectedPost.postId}`}>
+								<u>#{selectedPost.postId}</u>
+							</Link>
+						</h2>
+						<span>{selectedPost.reports.length > 0 && "WAITING RESOLVE"}</span>
 					</div>
 
 					<div className="detail-box">
 						<p>
-							<strong>Caption:</strong> {selectedPostDetail.caption}
+							<CircleUserRound /> {selectedPost.authorUsername}
 						</p>
-						<div className="detail-images">
-							{selectedPostDetail.images.map((img) => (
+						<p>
+							<Captions /> {selectedPost.caption}
+						</p>
+						{/* <div className="detail-images">
+							{selectedPost.images.map((img) => (
 								<img key={img.id} src={img.url} alt="Detail" />
 							))}
-						</div>
-						<p>
-							<strong>Đăng bởi:</strong> {selectedPostDetail.postUser.fullName}
-						</p>
+						</div> */}
 					</div>
 
-					<h3>Danh sách báo cáo</h3>
-					{reports.map((report, index) => (
+					<h3>List of report</h3>
+					{selectedPost.reports.map((report, index) => (
 						<div key={index} className="report-item">
 							<div className="report-header">
-								<img src={report.reporter.avatar} alt="Avatar" />
-								<p>{report.reporter.fullName}</p>
-								<span>{new Date(report.createAt).toLocaleString()}</span>
+								{/* <img src={report.reporter.avatar} alt="Avatar" /> */}
+								<p>{report.reporterUsername}</p>
+								<span>{new Date(report.reportedAt).toLocaleString()}</span>
 							</div>
-							<p className="report-content">{report.content}</p>
+							<p className="report-content">{report.reason} - {report.description}</p>
+							<button
+								onClick={() => {
+									setSelectedReport(report.reportId);
+								}}
+							>
+								{report.status}
+							</button>
 						</div>
 					))}
 				</div>
 			)}
 
-			{isModalOpen && (
-				<div className="modal-overlay">
-					<div className="modal">
-						<h3>Xử lý bài viết</h3>
-
-						<label>Chọn loại xử lý:</label>
-						<select
-							value={handleType}
-							onChange={(e) => setHandleType(e.target.value as HandleType)}
-						>
-							<option value="warning">Warning</option>
-							<option value="error">Error</option>
-							<option value="normal">Normal</option>
-						</select>
-
-						<label>Ghi chú xử lý:</label>
-						<textarea
-							value={handleNote}
-							onChange={(e) => setHandleNote(e.target.value)}
-							placeholder="Nhập ghi chú..."
-						/>
-
+			{selectedPost && selectedReport && (
+				<div className="report-modal" onClick={handleCloseModal}>
+					<div className="modal-content">
+						<h3>Xử lý báo cáo bài viết #{selectedPost.postId}</h3>
+						<p>Bạn muốn thực hiện hành động gì?</p>
 						<div className="modal-actions">
-							<button className="submit" onClick={handleSubmit}>
-								Hoàn tất
+							<button className="btn-danger" onClick={handleDeletePost}>
+								Xoá bài viết
 							</button>
-							<button className="cancel" onClick={handleCancel}>
-								Huỷ bỏ
+
+							<button className="btn-secondary" onClick={handleRejectReport}>
+								Bỏ qua
 							</button>
 						</div>
 					</div>

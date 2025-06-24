@@ -130,15 +130,18 @@ const AppRoutes = () => {
 							</ChatLayout>
 						}
 					/>
-					<Route
-						path="/user/:id"
-						element={
-							<MainLayout>
-								<Profile />
-							</MainLayout>
-						}
-					/>
+									<Route
+					path="/user/:id"
+					element={
+						<MainLayout>
+							<Profile />
+						</MainLayout>
+					}
+				/>
 				</Route>
+
+				{/* Route cho các trang công khai không cần xác thực */}
+
 				<Route
 					path="/user/p/:postId"
 					element={
@@ -183,6 +186,14 @@ const AppRoutes = () => {
 							</AdminLayout>
 						}
 					/>
+									<Route
+					path="/admin/user/:id"
+					element={
+						<AdminLayout>
+							<Profile />
+						</AdminLayout>
+					}
+				/>
 				</Route>
 				<Route path="*" element={<NotFoundPage />} />
 			</Routes>
