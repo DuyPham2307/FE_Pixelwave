@@ -5,6 +5,7 @@ import {
 	ReportPayload,
 	UserViolationSummary,
 } from "@/models/ReportModel";
+import { UserDTO } from "@/models/UserModel";
 import api from "@/utils/axiosInstance";
 
 // Tạo báo cáo mới
@@ -58,9 +59,18 @@ export const fetchUserReports = async (
 	return res.data;
 };
 
+export const fetchUserBanned = async (): Promise<UserDTO[]> => {
+	const res = await api.get("/api/reports/banned-users");
+	return res.data;
+}
+
 export const banUserViolance = async (userId: number) => {
 	await api.post(`/api/reports/user/${userId}/ban`);
 };
+
+export const unBanUserViolance = async (userId: number) => {
+	await api.post(`/api/reports/user/${userId}/unban`);
+}
 
 export const getPostReportList = async (): Promise<PaginatedPostReports> => {
 	try {

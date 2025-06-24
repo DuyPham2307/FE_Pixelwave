@@ -9,6 +9,7 @@ import {
 import { Report } from "@/models/ReportModel";
 import Spinner from "@/components/Spinner/Spinner";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const UserReport = () => {
 	const [reports, setReports] = useState<Report[]>([]);
@@ -111,7 +112,6 @@ const UserReport = () => {
 							>
 								{report.status}
 							</button>
-
 						</div>
 					))}
 
@@ -142,16 +142,31 @@ const UserReport = () => {
 							<button
 								className="btn-danger"
 								onClick={async () => {
-									await deleteReportedPost(reportToHandle.postId);
-									await updateReportStatus(reportToHandle.id, "RESOLVED");
-									setReports((prev) =>
-										prev.map((r) =>
-											r.id === reportToHandle.id
-												? { ...r, status: "RESOLVED" }
-												: r
-										)
-									);
-									handleCloseModal();
+									setLoading(true);
+									try {
+										await updateReportStatus(reportToHandle.id, "RESOLVED");
+										await deleteReportedPost(reportToHandle.postId);
+										setReports((prev) =>
+											prev.map((r) =>
+												r.id === reportToHandle.id
+													? { ...r, status: "RESOLVED" }
+													: r
+											)
+										);
+										handleCloseModal();
+										toast.success(
+											"Đã xoá bài viết và xử lý báo cáo thành công!"
+										);
+									} catch (error) {
+										console.error(
+											"Lỗi khi cập nhật trạng thái báo cáo:",
+											error
+										);
+										toast.error("Đã có lỗi xảy ra khi xử lý báo cáo!");
+										return;
+									} finally {
+										setLoading(false);
+									}
 								}}
 							>
 								Xoá bài viết
@@ -160,15 +175,28 @@ const UserReport = () => {
 							<button
 								className="btn-secondary"
 								onClick={async () => {
-									await updateReportStatus(reportToHandle.id, "REJECTED");
-									setReports((prev) =>
-										prev.map((r) =>
-											r.id === reportToHandle.id
-												? { ...r, status: "REJECTED" }
-												: r
-										)
-									);
-									handleCloseModal();
+									setLoading(true);
+									try {
+										await updateReportStatus(reportToHandle.id, "REJECTED");
+										setReports((prev) =>
+											prev.map((r) =>
+												r.id === reportToHandle.id
+													? { ...r, status: "REJECTED" }
+													: r
+											)
+										);
+										toast.success("Đã từ chối báo cáo thành công!");
+										handleCloseModal();
+									} catch (error) {
+										console.error(
+											"Lỗi khi cập nhật trạng thái báo cáo:",
+											error
+										);
+										toast.error("Đã có lỗi xảy ra khi xử lý báo cáo!");
+										return;
+									} finally {
+										setLoading(false);
+									}
 								}}
 							>
 								Bỏ qua

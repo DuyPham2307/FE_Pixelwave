@@ -14,7 +14,6 @@
 		background: #f2f5f7;
 		padding: 0.5rem 1rem;
 		border-radius: 8px;
-		margin-bottom: 1.5rem;
 
 		input {
 			flex: 1;
@@ -26,6 +25,33 @@
 		}
 	}
 
+	.selected-tag {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		border-radius: 8px;
+		font-size: 0.9rem;
+		margin: 0.5rem 0;
+
+		div {
+			padding: 4px 8px;
+			border-radius: 4px;
+			border: 1px solid #ddd;
+			cursor: pointer;
+			transition: background 0.2s ease;
+
+			&.active {
+				background: #254885;
+				color: white;
+			}
+
+			&:hover {
+				background: #254885;
+				color: white;
+			}
+		}
+	}
+
 	.account-container {
 		display: flex;
 		gap: 2rem;
@@ -34,8 +60,11 @@
 
 	.user-list {
 		flex: 1;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(160px, auto));
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-content: flex-start;
 		gap: 16px;
 		padding: 2px;
 		overflow: auto;
@@ -101,6 +130,8 @@
 			width: 100%;
 			list-style: none;
 			padding: 0;
+			overflow-y: scroll;
+			scrollbar-width: none;
 
 			li {
 				background: #fff;
@@ -114,18 +145,18 @@
 					flex-direction: row;
 					gap: 16px;
 
-					h3{
+					h3 {
 						margin: 0;
 						width: 100%;
 						text-align: left;
 					}
 
-					img{
+					img {
 						width: 40px;
 						height: 40px;
 					}
 
-					.report-label{
+					.report-label {
 						display: flex;
 						flex-direction: column;
 						justify-content: center;

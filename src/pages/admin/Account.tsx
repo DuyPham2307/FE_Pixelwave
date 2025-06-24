@@ -5,13 +5,16 @@ import { ReportDetail, UserViolationSummary } from "@/models/ReportModel";
 import {
 	banUserViolance,
 	fetchReportedUsers,
+	fetchUserBanned,
 	fetchUserReports,
+	unBanUserViolance,
 } from "@/services/reportService";
 import { formatRelativeTime } from "@/utils/formatTimestamp";
 import toast from "react-hot-toast";
 
 const Account: React.FC = () => {
 	const [users, setUsers] = useState<UserViolationSummary[]>([]);
+	const [tab, setTab] = useState<"user" | "banned">("user");
 	const [query, setQuery] = useState<string>("");
 	const [selectedUser, setSelectedUser] = useState<UserViolationSummary | null>(
 		null
@@ -21,12 +24,29 @@ const Account: React.FC = () => {
 
 	useEffect(() => {
 		const loadUsers = async () => {
-			const data = await fetchReportedUsers();
-			setUsers(data);
+			try {
+				if (tab === "banned") {
+					const bannedData = await fetchUserBanned();
+					const formattedBanned = bannedData.map((user) => ({
+						user,
+						violationCount: 0,
+					}));
+					setUsers(formattedBanned);
+				} else if (tab === "user") {
+					const userData = await fetchReportedUsers();
+					setUsers(userData);
+				}
+				setSelectedUser(null);
+				setReportDetails([]);
+				setShowReportDetails(false);
+			} catch (error) {
+				console.error("Error loading users:", error);
+				toast.error("Không thể tải danh sách người dùng");
+			}
 		};
 
 		loadUsers();
-	}, []);
+	}, [tab]);
 
 	const handleSelectUser = async (user: UserViolationSummary) => {
 		setSelectedUser(user);
@@ -42,9 +62,29 @@ const Account: React.FC = () => {
 	const handleBanUser = async (userId: number) => {
 		try {
 			await banUserViolance(userId);
+			setTab("banned");
+			setSelectedUser(null);
+			setUsers((prev) =>
+				prev.map((u) =>
+					u.user.id === userId ? { ...u, user: { ...u.user, banned: true } } : u
+				)
+			);
+			setReportDetails([]);
 			toast.success("Cấm người dùng khỏi hệ thống thành công!");
 		} catch (error) {
 			toast.error("Cấm người dùng thất bại");
+			console.log(error);
+		}
+	};
+
+	const handleUnBanUser = async (userId: number) => {
+		try {
+			await unBanUserViolance(userId);
+			setTab("user");
+			setSelectedUser(null);
+			toast.success("Mở cấm người dùng khỏi hệ thống thành công!");
+		} catch (error) {
+			toast.error("Người dùng mở cấm thất bại");
 			console.log(error);
 		}
 	};
@@ -60,9 +100,28 @@ const Account: React.FC = () => {
 					onChange={(e) => setQuery(e.target.value)}
 				/>
 			</div>
+			<div className="selected-tag">
+				<div
+					className={tab === "user" ? "active" : ""}
+					onClick={() => setTab("user")}
+				>
+					Account reported
+				</div>
+				<div
+					className={tab === "banned" ? "active" : ""}
+					onClick={() => setTab("banned")}
+				>
+					Account banned
+				</div>
+			</div>
 
 			<div className="account-container">
 				<div className={`user-list ${selectedUser ? "shrinked" : ""}`}>
+					{filteredUsers.length === 0 && (
+						<div className="no-users">
+							<p>Không có người dùng nào phù hợp với tìm kiếm.</p>
+						</div>
+					)}
 					{filteredUsers.map((user) => (
 						<div
 							key={user.user.id}
@@ -109,12 +168,21 @@ const Account: React.FC = () => {
 								</>
 							)}
 							<div className="actions">
-								<button
-									className="ban-btn"
-									onClick={() => handleBanUser(selectedUser.user.id)}
-								>
-									<CircleSlash /> Ban
-								</button>
+								{tab === "user" ? (
+									<button
+										className="ban-btn"
+										onClick={() => handleBanUser(selectedUser.user.id)}
+									>
+										<CircleSlash /> Ban
+									</button>
+								) : (
+									<button
+										className="ban-btn"
+										onClick={() => handleUnBanUser(selectedUser.user.id)}
+									>
+										<CircleSlash /> UnBan
+									</button>
+								)}
 							</div>
 						</>
 					)}
