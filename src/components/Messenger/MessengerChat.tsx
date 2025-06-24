@@ -153,17 +153,6 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 
 		try {
 			await sendImages(conversation.id, files);
-			const newMsg = {
-				id: 99999, // Tạm thời, sẽ cập nhật sau khi nhận từ server
-				content: "",
-				sender: userInfo as UserDTO,
-				createdAt: new Date().toISOString(),
-				images: previews,
-				channelId: conversation.id,
-				type: "CHAT",
-			};
-			setChat((prev) => [...prev, newMsg]);
-
 			// Scroll sau mỗi ảnh nếu muốn
 			setTimeout(() => {
 				endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -196,7 +185,7 @@ const MesssageChat = ({ conversation }: MesssageChatProps) => {
 				isBanned: false,
 			},
 			createdAt: new Date(msg.timestamp).toISOString(),
-			images: [],
+			images: msg.images,
 			channelId: msg.channelId,
 			type: msg.type || "CHAT",
 		};

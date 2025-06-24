@@ -23,6 +23,7 @@ export interface WebSocketMessageDTO{
   channelId: string; 
   type: "CHAT" | "JOIN" | "LEAVE" | null;
   timestamp: number;
+  images: ImageDTO[];
 }
 
 export interface Sort {
